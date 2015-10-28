@@ -19,7 +19,16 @@
             <properties>
               <font size="20"/>
               <horizontalAlignment value="0"/>
-              <text value="SSH Proxy Switcher V1.0"/>
+              <text value="SSH Proxy Switcher"/>
+            </properties>
+          </component>
+          <component id="17bc6" class="javax.swing.JLabel" binding="copyrightLabel">
+            <constraints border-constraint="South"/>
+            <properties>
+              <font style="2"/>
+              <horizontalAlignment value="0"/>
+              <horizontalTextPosition value="0"/>
+              <text value="&lt;html&gt;Copyright 2015 Mitch Talmadge (&lt;u&gt;https://liveforcode.net/&lt;/u&gt;)&lt;/html&gt;"/>
             </properties>
           </component>
         </children>
@@ -50,6 +59,22 @@
             </constraints>
             <properties>
               <text value="New Profile"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="9df12" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="South"/>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="73426" class="javax.swing.JLabel" binding="donateLabel">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <horizontalAlignment value="0"/>
+              <horizontalTextPosition value="11"/>
+              <icon value="images/heart.png"/>
+              <text value="&lt;html&gt;&lt;u&gt;This tool is free. College is not. Please donate :)&lt;/u&gt;&lt;/html&gt;"/>
             </properties>
           </component>
         </children>

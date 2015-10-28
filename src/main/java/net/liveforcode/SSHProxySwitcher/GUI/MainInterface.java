@@ -16,6 +16,8 @@ public class MainInterface extends JFrame {
     private JPanel profilesPanel;
     private JTree profilesTree;
     private JButton newProfileButton;
+    private JLabel copyrightLabel;
+    private JLabel donateLabel;
 
     public MainInterface() {
         setTitle("SSH Proxy Switcher");
@@ -25,7 +27,7 @@ public class MainInterface extends JFrame {
 
         setContentPane(this.contentPane);
 
-        this.configPanel.add(new ProfileConfiguration(), BorderLayout.CENTER);
+        this.configPanel.add(new ProfileConfigPanel(), BorderLayout.CENTER);
         pack();
         setResizable(false);
         setLocationRelativeTo(null);

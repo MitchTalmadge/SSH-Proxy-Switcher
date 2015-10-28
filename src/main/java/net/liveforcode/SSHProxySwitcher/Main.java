@@ -1,7 +1,5 @@
 package net.liveforcode.SSHProxySwitcher;
 
-import net.liveforcode.SSHProxySwitcher.GUI.MainInterface;
-
 import javax.swing.*;
 
 public class Main {
@@ -15,12 +13,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new MainInterface().setVisible(true);
-            }
-        });
+        new SSHProxySwitcher();
 
     }
 
