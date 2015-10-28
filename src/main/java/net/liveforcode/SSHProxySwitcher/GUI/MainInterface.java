@@ -1,6 +1,10 @@
 package net.liveforcode.SSHProxySwitcher.GUI;
 
+import net.liveforcode.SSHProxySwitcher.Versioning;
+import sun.misc.Version;
+
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 public class MainInterface extends JFrame {
@@ -8,21 +12,22 @@ public class MainInterface extends JFrame {
     private JPanel contentPane;
     private JLabel titleLabel;
     private JPanel headerPanel;
-    private JPanel centerPanel;
-    private JPanel treePanel;
-    private JTree tree;
+    private JPanel configPanel;
+    private JPanel profilesPanel;
+    private JTree profilesTree;
+    private JButton newProfileButton;
 
-    public MainInterface()
-    {
+    public MainInterface() {
         setTitle("SSH Proxy Switcher");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //TODO: Tray icon
 
-        setPreferredSize(new Dimension(600,400));
-        setMinimumSize(getPreferredSize());
-        setResizable(false);
+        this.titleLabel.setText(Versioning.PROGRAM_NAME_WITH_VERSION);
 
         setContentPane(this.contentPane);
+
+        this.configPanel.add(new ProfileConfiguration(), BorderLayout.CENTER);
         pack();
+        setResizable(false);
         setLocationRelativeTo(null);
     }
 

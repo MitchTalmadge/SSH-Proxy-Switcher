@@ -21,6 +21,7 @@ public class Main {
                 new MainInterface().setVisible(true);
             }
         });
+
     }
 
 }
