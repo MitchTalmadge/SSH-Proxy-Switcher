@@ -22,6 +22,8 @@ public class ProfileManagerTest implements ProfileManager.ProfileListener {
         assertEquals("xmlFile is not the same as supplied", xmlFile, profileManager.xmlFile);
     }
 
+
+
     @Test
     public void testAddAndRemoveListener() throws Exception {
         profileManager.profileListenerList.clear();

@@ -24,7 +24,7 @@ public class SSHProxySwitcher implements ProfileManager.ProfileListener {
 
     public void showMainInterface() {
         if (this.mainInterface == null)
-            mainInterface = new MainInterface();
+            mainInterface = new MainInterface(this);
         mainInterface.setVisible(true);
     }
 

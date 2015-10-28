@@ -1,5 +1,7 @@
 package net.liveforcode.SSHProxySwitcher.GUI;
 
+import net.liveforcode.SSHProxySwitcher.Profile;
+import net.liveforcode.SSHProxySwitcher.SSHProxySwitcher;
 import net.liveforcode.SSHProxySwitcher.Versioning;
 import sun.misc.Version;
 
@@ -11,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 public class MainInterface extends JFrame implements MouseListener {
 
@@ -19,12 +22,15 @@ public class MainInterface extends JFrame implements MouseListener {
     private JPanel headerPanel;
     private JPanel configPanel;
     private JPanel profilesPanel;
-    private JTree profilesTree;
+    JTree profilesTree;
     private JButton newProfileButton;
     private JLabel copyrightLabel;
     private JLabel donateLabel;
+    private SSHProxySwitcher sshProxySwitcher;
 
-    public MainInterface() {
+    public MainInterface(SSHProxySwitcher sshProxySwitcher) {
+        this.sshProxySwitcher = sshProxySwitcher;
+
         setTitle("SSH Proxy Switcher");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); //TODO: Tray icon
         setContentPane(this.contentPane);
@@ -36,10 +42,17 @@ public class MainInterface extends JFrame implements MouseListener {
         this.donateLabel.addMouseListener(this);
         this.donateLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        if(sshProxySwitcher != null)
+            refreshProfileList(sshProxySwitcher.getProfileManager().getLoadedProfilesAsArray());
+
         this.configPanel.add(new ProfileConfigPanel(), BorderLayout.CENTER);
         pack();
         setResizable(false);
         setLocationRelativeTo(null);
+    }
+
+    public void refreshProfileList(Profile[] profiles) {
+
     }
 
     @Override

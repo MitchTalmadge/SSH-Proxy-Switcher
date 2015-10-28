@@ -1,5 +1,6 @@
 package net.liveforcode.SSHProxySwitcher;
 
+import net.liveforcode.SSHProxySwitcher.Utilities.XMLUtilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -17,8 +18,8 @@ import java.util.Arrays;
 public class ProfileManager {
 
     final File xmlFile;
-    public ArrayList<ProfileListener> profileListenerList = new ArrayList<>();
-    public ArrayList<Profile> loadedProfiles = new ArrayList<>();
+    ArrayList<ProfileListener> profileListenerList = new ArrayList<>();
+    ArrayList<Profile> loadedProfiles = new ArrayList<>();
 
     public ProfileManager(File xmlFile) {
         this.xmlFile = xmlFile;
@@ -76,24 +77,24 @@ public class ProfileManager {
 
                     profile.setProfileName(profileElement.getAttribute("name"));
 
-                    Element sshSettingsElement = (Element) profileElement.getElementsByTagName("SSHSettings").item(0);
+                    Element sshSettingsElement = XMLUtilities.getFirstElementByName("SSHSettings", profileElement);
 
-                    String sshHostAddress = sshSettingsElement.getElementsByTagName("HostAddress").item(0).getTextContent();
+                    String sshHostAddress = XMLUtilities.getFirstElementByName("HostAddress", sshSettingsElement).getTextContent();
                     profile.setSshHostAddress(sshHostAddress);
 
-                    int sshHostPort = Integer.parseInt(sshSettingsElement.getElementsByTagName("HostPort").item(0).getTextContent());
+                    int sshHostPort = XMLUtilities.getElementAsInt(XMLUtilities.getFirstElementByName("HostPort", sshSettingsElement));
                     profile.setSshHostPort(sshHostPort);
 
-                    int sshProxyPort = Integer.parseInt(sshSettingsElement.getElementsByTagName("ProxyPort").item(0).getTextContent());
+                    int sshProxyPort = XMLUtilities.getElementAsInt(XMLUtilities.getFirstElementByName("ProxyPort", sshSettingsElement));
                     profile.setSshProxyPort(sshProxyPort);
 
-                    String sshUsername = sshSettingsElement.getElementsByTagName("Username").item(0).getTextContent();
+                    String sshUsername = XMLUtilities.getFirstElementByName("Username", sshSettingsElement).getTextContent();
                     profile.setSshUsername(sshUsername);
 
-                    String sshPassword = sshSettingsElement.getElementsByTagName("Password").item(0).getTextContent();
+                    String sshPassword = XMLUtilities.getFirstElementByName("Password", sshSettingsElement).getTextContent();
                     profile.setSshPassword(sshPassword); //TODO: Encrypt/Decrypt Password
 
-                    File sshPrivateKey = new File(sshSettingsElement.getElementsByTagName("PrivateKey").item(0).getTextContent());
+                    File sshPrivateKey = new File(XMLUtilities.getFirstElementByName("PrivateKey", sshSettingsElement).getTextContent());
                     profile.setSshPrivateKey(sshPrivateKey);
 
                     profiles[i] = profile;
@@ -129,6 +130,16 @@ public class ProfileManager {
 
     public File getXmlFile() {
         return xmlFile;
+    }
+
+    public ArrayList<Profile> getLoadedProfiles() {
+        return loadedProfiles;
+    }
+
+    public Profile[] getLoadedProfilesAsArray() {
+        Profile[] profiles = new Profile[loadedProfiles.size()];
+        profiles = loadedProfiles.toArray(profiles);
+        return profiles;
     }
 
     public interface ProfileListener {
