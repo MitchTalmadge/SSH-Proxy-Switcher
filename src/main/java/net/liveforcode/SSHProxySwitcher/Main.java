@@ -13,7 +13,9 @@ public class Main {
             e.printStackTrace();
         }
 
-        new SSHProxySwitcher();
+        SSHProxySwitcher sshProxySwitcher = new SSHProxySwitcher();
+        sshProxySwitcher.startUp();
+        sshProxySwitcher.showMainInterface();
     }
 
 }

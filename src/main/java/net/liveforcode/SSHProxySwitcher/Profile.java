@@ -16,7 +16,6 @@ public class Profile {
     }
 
     public Profile(String profileName, String sshHostAddress, int sshHostPort, int sshProxyPort, String sshUsername, String sshPassword, File sshPrivateKey) {
-
         this.profileName = profileName;
         this.sshHostAddress = sshHostAddress;
         this.sshHostPort = sshHostPort;

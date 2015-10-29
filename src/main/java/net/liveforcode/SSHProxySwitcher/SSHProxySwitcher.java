@@ -1,6 +1,5 @@
 package net.liveforcode.SSHProxySwitcher;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import net.liveforcode.SSHProxySwitcher.GUI.MainInterface;
 import net.liveforcode.SSHProxySwitcher.Utilities.FileUtilities;
 
@@ -9,13 +8,15 @@ import java.util.ArrayList;
 
 public class SSHProxySwitcher implements ProfileManager.ProfileListener {
 
-    private final ProfileManager profileManager;
+    private ProfileManager profileManager;
     MainInterface mainInterface;
 
-    public SSHProxySwitcher() {
-        profileManager = new ProfileManager(new File(FileUtilities.getRootDirectory(), "profiles.xml"));
+    public static final File PROFILES_XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
+
+    public void startUp() {
+        profileManager = new ProfileManager(PROFILES_XML_FILE);
+        profileManager.loadProfilesFromXML();
         profileManager.addProfileListener(this);
-        showMainInterface();
     }
 
     public ProfileManager getProfileManager() {
@@ -30,9 +31,8 @@ public class SSHProxySwitcher implements ProfileManager.ProfileListener {
 
     @Override
     public void onProfilesReloaded(ArrayList<Profile> loadedProfiles) {
-        if(mainInterface != null)
-        {
-            //TODO: Update Profile List
+        if (mainInterface != null) {
+            mainInterface.refreshProfileList();
         }
     }
 

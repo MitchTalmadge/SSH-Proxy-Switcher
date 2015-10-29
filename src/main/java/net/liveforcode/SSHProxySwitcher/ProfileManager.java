@@ -11,29 +11,22 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ProfileManager {
 
     final File xmlFile;
-    ArrayList<ProfileListener> profileListenerList = new ArrayList<>();
-    ArrayList<Profile> loadedProfiles = new ArrayList<>();
+    final ArrayList<ProfileListener> profileListenerList;
+    final ArrayList<Profile> loadedProfiles;
 
     public ProfileManager(File xmlFile) {
         this.xmlFile = xmlFile;
-
-        createProfilesXml(xmlFile);
-        try {
-            Profile[] profiles = loadProfilesFromXML(new FileInputStream(xmlFile));
-            if (profiles != null) {
-                loadedProfiles.addAll(Arrays.asList(profiles));
-                onProfilesReloaded(loadedProfiles);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        profileListenerList = new ArrayList<>();
+        loadedProfiles = new ArrayList<>();
     }
 
     public void addProfileListener(ProfileListener profileListener) {
@@ -65,9 +58,11 @@ public class ProfileManager {
             listener.onProfileRemoved(profile);
     }
 
-    public static Profile[] loadProfilesFromXML(InputStream xmlFileInputStream) {
+    public void loadProfilesFromXML() {
+        createProfilesXmlIfNotExists();
+
         try {
-            Document parsedDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFileInputStream);
+            Document parsedDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new FileInputStream(xmlFile));
             if (parsedDocument.getDocumentElement().getTagName().equals("Profiles")) {
                 NodeList profileList = parsedDocument.getDocumentElement().getElementsByTagName("Profile");
                 Profile[] profiles = new Profile[profileList.getLength()];
@@ -99,16 +94,17 @@ public class ProfileManager {
 
                     profiles[i] = profile;
                 }
-                return profiles;
+                this.loadedProfiles.clear();
+                this.loadedProfiles.addAll(Arrays.asList(profiles));
+                onProfilesReloaded(new ArrayList<>(loadedProfiles));
             }
         } catch (SAXException | IOException | ParserConfigurationException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
-    public static void createProfilesXml(File profilesFile) {
-        if (profilesFile.exists())
+    public void createProfilesXmlIfNotExists() {
+        if (xmlFile.exists())
             return;
 
         try {
@@ -120,7 +116,7 @@ public class ProfileManager {
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-            Result output = new StreamResult(profilesFile);
+            Result output = new StreamResult(xmlFile);
             Source input = new DOMSource(newDocument);
             transformer.transform(input, output);
         } catch (ParserConfigurationException | TransformerException e) {
@@ -128,18 +124,12 @@ public class ProfileManager {
         }
     }
 
-    public File getXmlFile() {
-        return xmlFile;
-    }
-
     public ArrayList<Profile> getLoadedProfiles() {
         return loadedProfiles;
     }
 
     public Profile[] getLoadedProfilesAsArray() {
-        Profile[] profiles = new Profile[loadedProfiles.size()];
-        profiles = loadedProfiles.toArray(profiles);
-        return profiles;
+        return loadedProfiles.toArray(new Profile[loadedProfiles.size()]);
     }
 
     public interface ProfileListener {

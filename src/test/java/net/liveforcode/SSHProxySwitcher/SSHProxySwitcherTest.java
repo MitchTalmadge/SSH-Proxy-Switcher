@@ -17,12 +17,6 @@ public class SSHProxySwitcherTest {
     }
 
     @Test
-    public void testGetProfileManager() throws Exception {
-        ProfileManager profileManager = sshProxySwitcher.getProfileManager();
-        assertNotNull("ProfileManager is null", profileManager);
-    }
-
-    @Test
     public void testShowMainInterface() throws Exception {
         sshProxySwitcher.showMainInterface();
         assertTrue("GUI is not visible", sshProxySwitcher.mainInterface.isVisible());
