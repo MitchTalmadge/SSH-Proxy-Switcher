@@ -38,18 +38,10 @@ public class MainInterface extends JFrame implements MouseListener {
         this.donateLabel.addMouseListener(this);
         this.donateLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        if(sshProxySwitcher != null)
-            refreshProfileList();
-
         this.configPanel.add(new ProfileConfigPanel(), BorderLayout.CENTER);
         pack();
         setResizable(false);
         setLocationRelativeTo(null);
-    }
-
-    public void refreshProfileList() {
-        //TODO: Refresh
-        sshProxySwitcher.getProfileManager().getLoadedProfilesAsArray();
     }
 
     @Override

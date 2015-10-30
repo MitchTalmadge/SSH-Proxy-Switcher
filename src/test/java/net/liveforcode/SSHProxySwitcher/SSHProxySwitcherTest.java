@@ -3,8 +3,7 @@ package net.liveforcode.SSHProxySwitcher;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SSHProxySwitcherTest {
 
@@ -12,13 +11,15 @@ public class SSHProxySwitcherTest {
 
     @Before
     public void setUp() throws Exception {
-        sshProxySwitcher = new SSHProxySwitcher();
+        this.sshProxySwitcher = new SSHProxySwitcher();
         assertNotNull("SSHProxySwitcher is null", sshProxySwitcher);
     }
 
     @Test
-    public void testShowMainInterface() throws Exception {
-        sshProxySwitcher.showMainInterface();
-        assertTrue("GUI is not visible", sshProxySwitcher.mainInterface.isVisible());
+    public void testSSHProxySwitcherInitializesProperly() throws Exception {
+        sshProxySwitcher.init();
+
+        assertNotNull("ProfileManager is null", sshProxySwitcher.getProfileManager());
+        assertNotNull("SSHManager is null", sshProxySwitcher.getSSHManager());
     }
 }

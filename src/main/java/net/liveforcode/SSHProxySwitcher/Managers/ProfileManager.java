@@ -1,68 +1,36 @@
-package net.liveforcode.SSHProxySwitcher;
+package net.liveforcode.SSHProxySwitcher.Managers;
 
+import net.liveforcode.SSHProxySwitcher.Profile;
 import net.liveforcode.SSHProxySwitcher.Utilities.XMLUtilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ProfileManager {
 
-    final File xmlFile;
-    final ArrayList<ProfileListener> profileListenerList;
-    final ArrayList<Profile> loadedProfiles;
+    private ArrayList<Profile> loadedProfiles;
 
-    public ProfileManager(File xmlFile) {
-        this.xmlFile = xmlFile;
-        profileListenerList = new ArrayList<>();
-        loadedProfiles = new ArrayList<>();
-    }
-
-    public void addProfileListener(ProfileListener profileListener) {
-        if (!this.profileListenerList.contains(profileListener))
-            profileListenerList.add(profileListener);
-    }
-
-    public void removeProfileListener(ProfileListener profileListener) {
-        profileListenerList.remove(profileListener);
-    }
-
-    private void onProfilesReloaded(ArrayList<Profile> loadedProfiles) {
-        for (ProfileListener listener : profileListenerList)
-            listener.onProfilesReloaded(loadedProfiles);
-    }
-
-    private void onProfileUpdated(Profile profile) {
-        for (ProfileListener listener : profileListenerList)
-            listener.onProfileUpdated(profile);
-    }
-
-    private void onProfileAdded(Profile profile) {
-        for (ProfileListener listener : profileListenerList)
-            listener.onProfileAdded(profile);
-    }
-
-    private void onProfileRemoved(Profile profile) {
-        for (ProfileListener listener : profileListenerList)
-            listener.onProfileRemoved(profile);
-    }
-
-    public void loadProfilesFromXML() {
-        createProfilesXmlIfNotExists();
-
+    public void loadProfilesFromXmlFile(File xmlFile) {
+        if (!xmlFile.exists())
+            createXmlFile(xmlFile);
+        if (!isXmlFileValid(xmlFile))
+            createXmlFile(xmlFile);
         try {
-            Document parsedDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new FileInputStream(xmlFile));
+            Document parsedDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
             if (parsedDocument.getDocumentElement().getTagName().equals("Profiles")) {
                 NodeList profileList = parsedDocument.getDocumentElement().getElementsByTagName("Profile");
                 Profile[] profiles = new Profile[profileList.getLength()];
@@ -94,19 +62,41 @@ public class ProfileManager {
 
                     profiles[i] = profile;
                 }
-                this.loadedProfiles.clear();
-                this.loadedProfiles.addAll(Arrays.asList(profiles));
-                onProfilesReloaded(new ArrayList<>(loadedProfiles));
+                this.loadedProfiles = new ArrayList<>();
+                loadedProfiles.addAll(Arrays.asList(profiles));
             }
         } catch (SAXException | IOException | ParserConfigurationException e) {
             e.printStackTrace();
         }
     }
 
-    public void createProfilesXmlIfNotExists() {
-        if (xmlFile.exists())
-            return;
+    private boolean isXmlFileValid(File xmlFile) {
+        try {
+            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            documentBuilder.setErrorHandler(new ErrorHandler() { //Prevent from printing to System.err
+                @Override
+                public void warning(SAXParseException e) throws SAXException {
+                    ;
+                }
 
+                @Override
+                public void fatalError(SAXParseException e) throws SAXException {
+                    throw e;
+                }
+
+                @Override
+                public void error(SAXParseException e) throws SAXException {
+                    throw e;
+                }
+            });
+            Document document = documentBuilder.parse(xmlFile);
+            return document.getDocumentElement().getTagName().equals("Profiles");
+        } catch (SAXException | IOException | ParserConfigurationException e) {
+            return false;
+        }
+    }
+
+    private void createXmlFile(File xmlFile) {
         try {
             Document newDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
             Element documentElement = newDocument.createElement("Profiles");
@@ -126,20 +116,5 @@ public class ProfileManager {
 
     public ArrayList<Profile> getLoadedProfiles() {
         return loadedProfiles;
-    }
-
-    public Profile[] getLoadedProfilesAsArray() {
-        return loadedProfiles.toArray(new Profile[loadedProfiles.size()]);
-    }
-
-    public interface ProfileListener {
-
-        void onProfilesReloaded(ArrayList<Profile> loadedProfiles);
-
-        void onProfileUpdated(Profile profile);
-
-        void onProfileAdded(Profile profile);
-
-        void onProfileRemoved(Profile profile);
     }
 }

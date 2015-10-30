@@ -1,53 +1,37 @@
 package net.liveforcode.SSHProxySwitcher;
 
-import net.liveforcode.SSHProxySwitcher.GUI.MainInterface;
+import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager;
+import net.liveforcode.SSHProxySwitcher.Managers.SSHManager;
 import net.liveforcode.SSHProxySwitcher.Utilities.FileUtilities;
 
 import java.io.File;
-import java.util.ArrayList;
 
-public class SSHProxySwitcher implements ProfileManager.ProfileListener {
+public class SSHProxySwitcher {
 
+    private final File xmlFile;
     private ProfileManager profileManager;
-    MainInterface mainInterface;
+    private SSHManager sshManager;
 
-    public static final File PROFILES_XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
+    public SSHProxySwitcher() {
+        this.xmlFile = new File(FileUtilities.getRootDirectory(), "profiles.xml");
+    }
 
-    public void startUp() {
-        profileManager = new ProfileManager(PROFILES_XML_FILE);
-        profileManager.loadProfilesFromXML();
-        profileManager.addProfileListener(this);
+    public static void main(String... args) {
+        SSHProxySwitcher sshProxySwitcher = new SSHProxySwitcher();
+        sshProxySwitcher.init();
+    }
+
+    public void init() {
+        this.profileManager = new ProfileManager();
+        profileManager.loadProfilesFromXmlFile(this.xmlFile);
+        this.sshManager = new SSHManager();
     }
 
     public ProfileManager getProfileManager() {
-        return profileManager;
+        return this.profileManager;
     }
 
-    public void showMainInterface() {
-        if (this.mainInterface == null)
-            mainInterface = new MainInterface(this);
-        mainInterface.setVisible(true);
-    }
-
-    @Override
-    public void onProfilesReloaded(ArrayList<Profile> loadedProfiles) {
-        if (mainInterface != null) {
-            mainInterface.refreshProfileList();
-        }
-    }
-
-    @Override
-    public void onProfileUpdated(Profile profile) {
-
-    }
-
-    @Override
-    public void onProfileAdded(Profile profile) {
-
-    }
-
-    @Override
-    public void onProfileRemoved(Profile profile) {
-
+    public SSHManager getSSHManager() {
+        return this.sshManager;
     }
 }

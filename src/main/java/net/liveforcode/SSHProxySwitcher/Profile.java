@@ -3,7 +3,6 @@ package net.liveforcode.SSHProxySwitcher;
 import java.io.File;
 
 public class Profile {
-
     private String profileName;
     private String sshHostAddress;
     private int sshHostPort;
@@ -11,19 +10,6 @@ public class Profile {
     private String sshUsername;
     private String sshPassword;
     private File sshPrivateKey;
-
-    public Profile() {
-    }
-
-    public Profile(String profileName, String sshHostAddress, int sshHostPort, int sshProxyPort, String sshUsername, String sshPassword, File sshPrivateKey) {
-        this.profileName = profileName;
-        this.sshHostAddress = sshHostAddress;
-        this.sshHostPort = sshHostPort;
-        this.sshProxyPort = sshProxyPort;
-        this.sshUsername = sshUsername;
-        this.sshPassword = sshPassword;
-        this.sshPrivateKey = sshPrivateKey;
-    }
 
     public String getProfileName() {
         return profileName;
