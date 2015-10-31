@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SSHManager {
 
-    SSHMaintainerThread thread;
+    private SSHMaintainerThread thread;
 
     protected static Session createSessionFromProfile(Profile profile) throws JSchException {
         JSch jSch = new JSch();

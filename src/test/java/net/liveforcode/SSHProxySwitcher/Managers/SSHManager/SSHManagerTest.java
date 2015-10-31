@@ -11,14 +11,10 @@ import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.sftp.SftpSubsystem;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.*;
-import org.junit.internal.matchers.ThrowableCauseMatcher;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,8 +103,7 @@ public class SSHManagerTest {
 
     @Test
     public void testStartConnectionWillOpenConnectionIfEverythingValid() throws Exception {
-        sshManager.startConnection(validProfile);
-        assertTrue("Connection is not established", sshManager.isConnected());
+        connectWithValidProfile();
     }
 
     @Test
@@ -125,8 +120,7 @@ public class SSHManagerTest {
 
     @Test
     public void testSSHManagerWillRestartConnectionIfClosedUnexpectedly() throws Exception {
-        sshManager.startConnection(validProfile);
-        assertTrue("Connection is not established", sshManager.isConnected());
+        connectWithValidProfile();
 
         assertEquals("Incorrect number of active sessions", 1, sshd.getActiveSessions().size());
         Thread.sleep(100); //Give it time before disconnection
@@ -135,5 +129,18 @@ public class SSHManagerTest {
         assertFalse("Connection is still established", sshManager.isConnected());
         Thread.sleep(1000);
         assertTrue("Connection is not established", sshManager.isConnected());
+    }
+
+    private void connectWithValidProfile() throws SSHConnectionException {
+        sshManager.startConnection(validProfile);
+        assertTrue("Connection is not established", sshManager.isConnected());
+    }
+
+    @Test
+    public void testStopConnectionWillDisconnectSession() throws Exception {
+        connectWithValidProfile();
+
+        sshManager.stopConnection();
+        assertFalse("Connection is still established", sshManager.isConnected());
     }
 }
