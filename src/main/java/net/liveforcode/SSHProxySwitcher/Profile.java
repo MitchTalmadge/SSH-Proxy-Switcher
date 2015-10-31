@@ -11,6 +11,20 @@ public class Profile {
     private String sshPassword;
     private File sshPrivateKey;
 
+    public Profile() {
+
+    }
+
+    public Profile(Profile otherProfile) {
+        profileName = otherProfile.getProfileName();
+        sshHostAddress = otherProfile.getSshHostAddress();
+        sshHostPort = otherProfile.getSshHostPort();
+        sshProxyPort = otherProfile.getSshProxyPort();
+        sshUsername = otherProfile.getSshUsername();
+        sshPassword = otherProfile.getSshPassword();
+        sshPrivateKey = otherProfile.getSshPrivateKey();
+    }
+
     public String getProfileName() {
         return profileName;
     }

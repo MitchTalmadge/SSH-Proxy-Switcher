@@ -1,7 +1,7 @@
 package net.liveforcode.SSHProxySwitcher;
 
 import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager;
-import net.liveforcode.SSHProxySwitcher.Managers.SSHManager;
+import net.liveforcode.SSHProxySwitcher.Managers.SSHManager.SSHManager;
 import net.liveforcode.SSHProxySwitcher.Utilities.FileUtilities;
 
 import java.io.File;
