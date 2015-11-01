@@ -76,7 +76,7 @@ Copyright Text:
 
 ------
 
-This project implements the "JNA" Version 4.1.0 Library
+This project implements the "JNA" Version 4.2.1 and "JNA-Platform" Version 4.2.1 Libraries
 (https://github.com/java-native-access/jna)
 
 Copyright Origin: https://github.com/java-native-access/jna/blob/master/LICENSE.ASL
@@ -114,7 +114,7 @@ Copyright Text:
 
 ------
 
-This project implements the "SLF4J" Simple Binding & API Module Version 1.7.12 Libraries for testing purposes
+This project implements the "SLF4J" "Simple Binding" Version 1.7.12 and "API Module" Version 1.7.12 Libraries for testing purposes
 (http://www.slf4j.org/)
 
 Copyright Origin: http://www.slf4j.org/license.html
