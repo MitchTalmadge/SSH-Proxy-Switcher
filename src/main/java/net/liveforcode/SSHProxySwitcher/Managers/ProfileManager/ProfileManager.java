@@ -1,6 +1,5 @@
-package net.liveforcode.SSHProxySwitcher.Managers;
+package net.liveforcode.SSHProxySwitcher.Managers.ProfileManager;
 
-import net.liveforcode.SSHProxySwitcher.Profile;
 import net.liveforcode.SSHProxySwitcher.Utilities.XMLUtilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

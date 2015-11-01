@@ -1,4 +1,4 @@
-package net.liveforcode.SSHProxySwitcher;
+package net.liveforcode.SSHProxySwitcher.Managers.ProfileManager;
 
 import java.io.File;
 

@@ -3,7 +3,7 @@ package net.liveforcode.SSHProxySwitcher.Managers.SSHManager;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import net.liveforcode.SSHProxySwitcher.Profile;
+import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.Profile;
 
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
