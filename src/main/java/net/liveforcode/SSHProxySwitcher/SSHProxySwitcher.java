@@ -1,6 +1,8 @@
 package net.liveforcode.SSHProxySwitcher;
 
 import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.ProfileManager;
+import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesException;
+import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesManager;
 import net.liveforcode.SSHProxySwitcher.Managers.SSHManager.SSHManager;
 import net.liveforcode.SSHProxySwitcher.Utilities.FileUtilities;
 
@@ -12,18 +14,18 @@ import java.util.prefs.Preferences;
 
 public class SSHProxySwitcher {
 
-    private final File xmlFile = new File(FileUtilities.getRootDirectory(), "profiles.xml");
+    private static final File XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
+    private static final File PROPERTIES_FILE = new File(FileUtilities.getRootDirectory(), "SSHProxySwitcher.config");
+    private PropertiesManager propertiesManager;
     private ProfileManager profileManager;
     private SSHManager sshManager;
 
     public SSHProxySwitcher() {
-        if(!isWindows())
-        {
+        if (!isWindows()) {
             System.err.println("SSH Proxy Switcher only works on Windows.");
             System.exit(1);
         }
-        if(!isRunningAsAdmin())
-        {
+        if (!isRunningAsAdmin()) {
             System.err.println("SSH Proxy Switcher requires Administrator Privileges");
             System.exit(2);
         }
@@ -35,8 +37,14 @@ public class SSHProxySwitcher {
     }
 
     public void init() {
+        this.propertiesManager = new PropertiesManager();
+        try {
+            propertiesManager.loadPropertiesFromFile(PROPERTIES_FILE);
+        } catch (PropertiesException e) {
+            e.printStackTrace();
+        }
         this.profileManager = new ProfileManager();
-        profileManager.loadProfilesFromXmlFile(this.xmlFile);
+        profileManager.loadProfilesFromXmlFile(XML_FILE);
         this.sshManager = new SSHManager();
     }
 
@@ -48,8 +56,7 @@ public class SSHProxySwitcher {
         return this.sshManager;
     }
 
-    private boolean isWindows()
-    {
+    private boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows");
     }
 
