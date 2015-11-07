@@ -1,5 +1,6 @@
 package net.liveforcode.SSHProxySwitcher;
 
+import net.liveforcode.SSHProxySwitcher.GUI.GUIHelper;
 import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.ProfileManager;
 import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesException;
 import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesManager;
@@ -22,11 +23,11 @@ public class SSHProxySwitcher {
 
     public SSHProxySwitcher() {
         if (!isWindows()) {
-            System.err.println("SSH Proxy Switcher only works on Windows.");
+            GUIHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
             System.exit(1);
         }
         if (!isRunningAsAdmin()) {
-            System.err.println("SSH Proxy Switcher requires Administrator Privileges");
+            GUIHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrator Privileges. This program will now close.");
             System.exit(2);
         }
     }
