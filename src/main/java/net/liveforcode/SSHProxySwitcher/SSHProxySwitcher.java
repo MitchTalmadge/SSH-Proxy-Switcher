@@ -1,11 +1,9 @@
 package net.liveforcode.SSHProxySwitcher;
 
-import net.liveforcode.SSHProxySwitcher.Managers.LoggingManager.LoggingException;
-import net.liveforcode.SSHProxySwitcher.Managers.LoggingManager.LoggingManager;
 import javafx.application.Application;
-import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import net.liveforcode.SSHProxySwitcher.GUI.GUIHelper;
+import net.liveforcode.SSHProxySwitcher.Managers.LoggingManager.LoggingManager;
 import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.ProfileManager;
 import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesException;
 import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesManager;
@@ -48,7 +46,9 @@ public class SSHProxySwitcher extends Application {
             guiHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrator Privileges. This program will now close.");
             System.exit(2);
         }
-    }
+
+        this.loggingManager = new LoggingManager();
+        loggingManager.startLogging(LOG_DIR);
 
         this.propertiesManager = new PropertiesManager();
         try {
