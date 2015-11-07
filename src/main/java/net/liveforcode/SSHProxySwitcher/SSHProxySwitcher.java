@@ -2,6 +2,10 @@ package net.liveforcode.SSHProxySwitcher;
 
 import net.liveforcode.SSHProxySwitcher.Managers.LoggingManager.LoggingException;
 import net.liveforcode.SSHProxySwitcher.Managers.LoggingManager.LoggingManager;
+import javafx.application.Application;
+import javafx.embed.swing.JFXPanel;
+import javafx.stage.Stage;
+import net.liveforcode.SSHProxySwitcher.GUI.GUIHelper;
 import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.ProfileManager;
 import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesException;
 import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesManager;
@@ -16,43 +20,36 @@ import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
-public class SSHProxySwitcher {
+public class SSHProxySwitcher extends Application {
 
     private static final File LOG_DIR = new File(FileUtilities.getRootDirectory(), "logs");
     private static final File XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
     private static final File PROPERTIES_FILE = new File(FileUtilities.getRootDirectory(), "SSHProxySwitcher.config");
+    private GUIHelper guiHelper;
     private LoggingManager loggingManager;
     private PropertiesManager propertiesManager;
     private ProfileManager profileManager;
     private SSHManager sshManager;
     private ProxyManager proxyManager;
 
-    public SSHProxySwitcher() {
+    public static void main(String... args) {
+        Application.launch(SSHProxySwitcher.class);
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        this.guiHelper = new GUIHelper();
+
         if (!isWindows()) {
-            System.err.println("SSH Proxy Switcher only works on Windows.");
+            guiHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
             System.exit(1);
         }
         if (!isRunningAsAdmin()) {
-            System.err.println("SSH Proxy Switcher requires Administrator Privileges");
+            guiHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrator Privileges. This program will now close.");
             System.exit(2);
         }
     }
 
-    public static void main(String... args) {
-        SSHProxySwitcher sshProxySwitcher = new SSHProxySwitcher();
-        sshProxySwitcher.init();
-    }
-
-    public void init() {
-        this.loggingManager = new LoggingManager();
-        try {
-            loggingManager.startLogging(LOG_DIR);
-        } catch (LoggingException e) {
-            e.printStackTrace();
-        }
-        loggingManager.log(Level.INFO, "Starting SSHProxySwitcher");
-
-        loggingManager.log(Level.INFO, "Reading Config File");
         this.propertiesManager = new PropertiesManager();
         try {
             propertiesManager.loadPropertiesFromFile(PROPERTIES_FILE);

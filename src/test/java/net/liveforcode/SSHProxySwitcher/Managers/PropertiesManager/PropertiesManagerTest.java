@@ -34,6 +34,8 @@ public class PropertiesManagerTest {
             inputStream.close();
         if (outputStream != null)
             outputStream.close();
+
+        deletePropertiesFile();
     }
 
     @Test
