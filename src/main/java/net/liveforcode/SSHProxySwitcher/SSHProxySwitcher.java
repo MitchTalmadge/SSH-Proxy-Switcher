@@ -31,7 +31,7 @@ public class SSHProxySwitcher extends Application {
     private ProxyManager proxyManager;
 
     public static void main(String... args) {
-        Application.launch(SSHProxySwitcher.class);
+        launch(args);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class SSHProxySwitcher extends Application {
             System.exit(1);
         }
         if (!isRunningAsAdmin()) {
-            guiHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrator Privileges. This program will now close.");
+            guiHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrative Privileges. This program will now close.");
             System.exit(2);
         }
 
@@ -85,15 +85,15 @@ public class SSHProxySwitcher extends Application {
     private boolean isRunningAsAdmin() {
         Preferences prefs = Preferences.systemRoot();
         PrintStream systemErr = System.err;
-        synchronized (systemErr) {
+        synchronized (System.err) {
             System.setErr(new PrintStream(new OutputStream() {
                 @Override
                 public void write(int i) throws IOException {
                 }
             }));
             try {
-                prefs.put("foo", "bar"); // SecurityException on Windows
-                prefs.remove("foo");
+                prefs.put("SSHProxySwitcher_AdminChecker", "Success"); // SecurityException on Windows
+                prefs.remove("SSHProxySwitcher_AdminChecker");
                 prefs.flush(); // BackingStoreException on Linux
                 return true;
             } catch (Exception e) {

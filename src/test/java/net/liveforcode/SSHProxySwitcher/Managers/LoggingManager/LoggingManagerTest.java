@@ -2,6 +2,7 @@ package net.liveforcode.SSHProxySwitcher.Managers.LoggingManager;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.*;
@@ -16,6 +17,13 @@ public class LoggingManagerTest {
 
     private static final File LOG_DIR = new File("logs/");
     private LoggingManager loggingManager;
+
+    @BeforeClass
+    public static void beforeClass()
+    {
+        if(!LOG_DIR.exists())
+            LOG_DIR.mkdir();
+    }
 
     @Before
     public void setUp() throws Exception {

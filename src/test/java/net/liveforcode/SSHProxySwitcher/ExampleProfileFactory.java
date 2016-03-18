@@ -6,7 +6,7 @@ public class ExampleProfileFactory {
 
     public static final String CORRECT_HOST = "localhost";
     public static final String INCORRECT_HOST = "incorrect.host";
-    public static final int CORRECT_HOST_PORT = 28;
+    public static final int CORRECT_HOST_PORT = 50000;
     public static final String USERNAME = "tester";
     public static final String CORRECT_PASSWORD = "correctPassword";
     public static final String INCORRECT_PASSWORD = "incorrectPassword";
@@ -21,7 +21,7 @@ public class ExampleProfileFactory {
         VALID_PROFILE.setProfileName("Valid Profile");
         VALID_PROFILE.setSshHostAddress(CORRECT_HOST);
         VALID_PROFILE.setSshHostPort(CORRECT_HOST_PORT);
-        VALID_PROFILE.setSshProxyPort(2000);
+        VALID_PROFILE.setSshProxyPort(50001);
         VALID_PROFILE.setSshUsername(USERNAME);
         VALID_PROFILE.setSshPassword(CORRECT_PASSWORD);
 
