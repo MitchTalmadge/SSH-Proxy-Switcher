@@ -1,6 +1,6 @@
 package com.mitchtalmadge.sshproxyswitcher;
 
-import com.mitchtalmadge.sshproxyswitcher.Managers2.ProfileManager2.Profile;
+import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 
 public class ExampleProfileFactory {
 

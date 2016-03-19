@@ -1,6 +1,6 @@
 package com.mitchtalmadge.sshproxyswitcher.GUI;
 
-import com.mitchtalmadge.sshproxyswitcher.GUIHelper;
+import com.mitchtalmadge.sshproxyswitcher.gui.GUIHelper;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import org.junit.Before;

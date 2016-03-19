@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mitchtalmadge.sshproxyswitcher.gui.main.MainController">
    <left>
       <BorderPane BorderPane.alignment="CENTER">
          <top>
@@ -16,13 +16,6 @@
                </font>
             </Label>
          </top>
-         <center>
-            <TreeView fx:id="profilesTreeView" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets bottom="5.0" />
-               </BorderPane.margin>
-            </TreeView>
-         </center>
          <bottom>
             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCreateButtonFired" text="Create New Profile" BorderPane.alignment="CENTER">
                <BorderPane.margin>
@@ -33,6 +26,13 @@
          <BorderPane.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" />
          </BorderPane.margin>
+         <center>
+            <ListView fx:id="profileListView" prefHeight="300.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets bottom="5.0" />
+               </BorderPane.margin>
+            </ListView>
+         </center>
       </BorderPane>
    </left>
    <top>
@@ -113,8 +113,8 @@
                   </VBox>
                   <HBox spacing="20.0">
                      <children>
-                        <CheckBox fx:id="proxyUseCheck" mnemonicParsing="false" onAction="#onProxyUseCheckFired" text="Use a Proxy" />
                         <CheckBox fx:id="proxyAutosetCheck" mnemonicParsing="false" onAction="#onProxyAutosetCheckFired" text="Automatically Enable Proxy" />
+                        <CheckBox fx:id="proxyTunnelCheck" mnemonicParsing="false" onAction="#onProxyTunnelCheckFired" text="Enable SSH Dynamic Tunnel" />
                      </children>
                   </HBox>
                   <VBox fx:id="proxyConfiguration" VBox.vgrow="NEVER">

@@ -1,14 +1,20 @@
 package com.mitchtalmadge.sshproxyswitcher;
 
+import com.mitchtalmadge.sshproxyswitcher.gui.GUIHelper;
+import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.logging.LoggingManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.profiles.ProfileManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesException;
+import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxyManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHManager;
+import com.mitchtalmadge.sshproxyswitcher.utilities.FileUtilities;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import com.mitchtalmadge.sshproxyswitcher.Managers2.LoggingManager2.LoggingManager;
-import com.mitchtalmadge.sshproxyswitcher.Managers2.ProfileManager2.ProfileManager;
-import com.mitchtalmadge.sshproxyswitcher.Managers2.PropertiesManager2.PropertiesException;
-import com.mitchtalmadge.sshproxyswitcher.Managers2.PropertiesManager2.PropertiesManager;
-import com.mitchtalmadge.sshproxyswitcher.Managers2.ProxyManager2.ProxyManager;
-import com.mitchtalmadge.sshproxyswitcher.Managers2.SSHManager2.SSHManager;
-import com.mitchtalmadge.sshproxyswitcher.Utilities2.FileUtilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +28,14 @@ public class SSHProxySwitcher extends Application {
     private static final File LOG_DIR = new File(FileUtilities.getRootDirectory(), "logs");
     private static final File XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
     private static final File PROPERTIES_FILE = new File(FileUtilities.getRootDirectory(), "SSHProxySwitcher.config");
-    private GUIHelper guiHelper;
     private LoggingManager loggingManager;
     private PropertiesManager propertiesManager;
     private ProfileManager profileManager;
     private SSHManager sshManager;
     private ProxyManager proxyManager;
+    private TrayIconManager trayIconManager;
+
+    private Stage stage;
 
     public static void main(String... args) {
         launch(args);
@@ -35,14 +43,13 @@ public class SSHProxySwitcher extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.guiHelper = new GUIHelper();
 
         if (!isWindows()) {
-            guiHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
+            GUIHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
             System.exit(1);
         }
         if (!isRunningAsAdmin()) {
-            guiHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrative Privileges. This program will now close.");
+            GUIHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrative Privileges. This program will now close.");
             System.exit(2);
         }
 
@@ -66,7 +73,46 @@ public class SSHProxySwitcher extends Application {
         loggingManager.log(Level.INFO, "Starting Proxy Service");
         this.proxyManager = new ProxyManager();
 
-        loggingManager.log(Level.INFO, "SSHProxySwitcher is running");
+        loggingManager.log(Level.INFO, "Starting Tray Icon Service");
+        this.trayIconManager = new TrayIconManager(this);
+
+        loggingManager.log(Level.INFO, "Loading User Interface");
+        Platform.setImplicitExit(false); //Prevent application from closing when window is hidden.
+
+        this.stage = primaryStage;
+        stage.setTitle(Versioning.PROGRAM_NAME);
+        stage.setResizable(false);
+        stage.getIcons().add(Versioning.getLogoAsJavaFXImage());
+        stage.setOnCloseRequest(event -> {
+            loggingManager.log(Level.INFO, "Hiding Control Panel");
+            stage.hide();
+            event.consume();
+        });
+
+        Parent root = FXMLLoader.load(getClass().getResource("/gui/main.fxml"));
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+
+        loggingManager.log(Level.INFO, "SSH Proxy Switcher is running");
+    }
+
+    @Override
+    public void stop() throws Exception {
+        loggingManager.log(Level.INFO, "SSH Proxy Switcher is shutting down");
+
+        stage.hide();
+
+        loggingManager.log(Level.INFO, "Shutting down all SSH Connections");
+        sshManager.stopConnection();
+
+        loggingManager.log(Level.INFO, "Saving properties");
+        propertiesManager.saveProperties();
+
+        loggingManager.log(Level.INFO, "Closing Logger");
+        loggingManager.stopLogging();
+
+        System.exit(0);
     }
 
     public ProfileManager getProfileManager() {
@@ -75,6 +121,10 @@ public class SSHProxySwitcher extends Application {
 
     public SSHManager getSSHManager() {
         return this.sshManager;
+    }
+
+    public LoggingManager getLoggingManager() {
+        return loggingManager;
     }
 
     private boolean isWindows() {
@@ -102,4 +152,14 @@ public class SSHProxySwitcher extends Application {
             }
         }
     }
+
+    public void showMainWindow() {
+        Platform.runLater(() -> {
+            if (stage != null) {
+                loggingManager.log(Level.INFO, "Showing Control Panel");
+                stage.show();
+            }
+        });
+    }
+
 }
