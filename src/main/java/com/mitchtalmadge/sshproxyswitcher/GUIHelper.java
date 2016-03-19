@@ -1,9 +1,9 @@
-package net.liveforcode.SSHProxySwitcher.GUI;
+package com.mitchtalmadge.sshproxyswitcher;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
-import net.liveforcode.SSHProxySwitcher.Versioning;
+import com.mitchtalmadge.sshproxyswitcher.Versioning;
 
 import java.util.Optional;
 

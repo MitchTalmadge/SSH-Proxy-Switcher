@@ -1,6 +1,6 @@
-package net.liveforcode.SSHProxySwitcher;
+package com.mitchtalmadge.sshproxyswitcher;
 
-import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.Profile;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.ProfileManager2.Profile;
 
 public class ExampleProfileFactory {
 

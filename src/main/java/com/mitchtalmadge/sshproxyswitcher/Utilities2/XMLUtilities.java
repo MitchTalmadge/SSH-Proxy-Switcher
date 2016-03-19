@@ -1,4 +1,4 @@
-package net.liveforcode.SSHProxySwitcher.Utilities;
+package com.mitchtalmadge.sshproxyswitcher.Utilities2;
 
 import org.w3c.dom.Element;
 

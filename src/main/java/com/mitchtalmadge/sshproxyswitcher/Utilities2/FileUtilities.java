@@ -1,4 +1,4 @@
-package net.liveforcode.SSHProxySwitcher.Utilities;
+package com.mitchtalmadge.sshproxyswitcher.Utilities2;
 
 import java.io.File;
 import java.net.URISyntaxException;

@@ -1,5 +1,6 @@
-package net.liveforcode.SSHProxySwitcher.GUI;
+package com.mitchtalmadge.sshproxyswitcher.GUI;
 
+import com.mitchtalmadge.sshproxyswitcher.GUIHelper;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import org.junit.Before;

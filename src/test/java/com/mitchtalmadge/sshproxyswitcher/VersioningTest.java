@@ -1,4 +1,4 @@
-package net.liveforcode.SSHProxySwitcher;
+package com.mitchtalmadge.sshproxyswitcher;
 
 import javafx.scene.image.Image;
 import org.junit.Test;

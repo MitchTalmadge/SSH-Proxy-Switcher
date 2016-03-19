@@ -1,15 +1,14 @@
-package net.liveforcode.SSHProxySwitcher;
+package com.mitchtalmadge.sshproxyswitcher;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import net.liveforcode.SSHProxySwitcher.GUI.GUIHelper;
-import net.liveforcode.SSHProxySwitcher.Managers.LoggingManager.LoggingManager;
-import net.liveforcode.SSHProxySwitcher.Managers.ProfileManager.ProfileManager;
-import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesException;
-import net.liveforcode.SSHProxySwitcher.Managers.PropertiesManager.PropertiesManager;
-import net.liveforcode.SSHProxySwitcher.Managers.ProxyManager.ProxyManager;
-import net.liveforcode.SSHProxySwitcher.Managers.SSHManager.SSHManager;
-import net.liveforcode.SSHProxySwitcher.Utilities.FileUtilities;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.LoggingManager2.LoggingManager;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.ProfileManager2.ProfileManager;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.PropertiesManager2.PropertiesException;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.PropertiesManager2.PropertiesManager;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.ProxyManager2.ProxyManager;
+import com.mitchtalmadge.sshproxyswitcher.Managers2.SSHManager2.SSHManager;
+import com.mitchtalmadge.sshproxyswitcher.Utilities2.FileUtilities;
 
 import java.io.File;
 import java.io.IOException;
