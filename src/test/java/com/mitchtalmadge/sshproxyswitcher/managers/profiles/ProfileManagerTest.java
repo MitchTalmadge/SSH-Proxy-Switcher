@@ -76,12 +76,12 @@ public class ProfileManagerTest {
 
         Profile profile = profiles.get(0);
         assertEquals("Profile Name is incorrect", "Profile 1", profile.getProfileName());
-        assertEquals("SSH Host Address is incorrect", "test.com", profile.getSshHostAddress());
+        assertEquals("SSH Host Address is incorrect", "test.com", profile.getSshHostName());
         assertEquals("SSH Host Port is incorrect", 22, profile.getSshHostPort());
-        assertEquals("SSH Proxy Port is incorrect", 2000, profile.getSshProxyPort());
+        assertEquals("SSH Proxy Port is incorrect", 2000, profile.getProxyPort());
         assertEquals("SSH Username is incorrect", "root", profile.getSshUsername());
         assertEquals("SSH Password is incorrect", "password", profile.getSshPassword());
-        assertEquals("SSH Private Key is incorrect", new File("id_rsa"), profile.getSshPrivateKey());
+        assertEquals("SSH Private Key is incorrect", new File("id_rsa"), profile.getSshRsaPrivateKeyFile());
     }
 
     private void deleteMutableProfilesXmlFile() {

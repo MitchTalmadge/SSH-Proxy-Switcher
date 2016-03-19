@@ -16,17 +16,21 @@ public class ProxyManager {
         if (profile == null) {
             setProxyEnabled(false);
             throw new ProxySettingsException("Profile is null");
-        } else if (profile.getSshProxyPort() < 0 || profile.getSshProxyPort() > 65535) {
+        } else if (profile.getProxyPort() < 0 || profile.getProxyPort() > 65535) {
             setProxyEnabled(false);
             throw new ProxySettingsException("Profile is invalid");
         } else {
             setProxyEnabled(true);
-            setProxyPort(profile.getSshProxyPort());
+            setProxy(profile.getProxyHostName(), profile.getProxyPort());
         }
     }
 
-    private void setProxyPort(int sshProxyPort) {
-        Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, "socks=localhost:" + sshProxyPort);
+    private void setProxy(String proxyHostName, int proxyPort) {
+        if (proxyHostName == null || proxyHostName.isEmpty())
+            proxyHostName = "127.0.0.1";
+        if (proxyPort == 0)
+            proxyPort = 2000;
+        Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, "socks=" + proxyHostName + ":" + proxyPort);
     }
 
     public void disableProxySettings() {

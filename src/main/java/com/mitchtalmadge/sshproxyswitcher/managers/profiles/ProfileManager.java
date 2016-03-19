@@ -42,13 +42,13 @@ public class ProfileManager {
                     Element sshSettingsElement = XMLUtilities.getFirstElementByName("SSHSettings", profileElement);
 
                     String sshHostAddress = XMLUtilities.getFirstElementByName("HostAddress", sshSettingsElement).getTextContent();
-                    profile.setSshHostAddress(sshHostAddress);
+                    profile.setSshHostName(sshHostAddress);
 
                     int sshHostPort = XMLUtilities.getElementAsInt(XMLUtilities.getFirstElementByName("HostPort", sshSettingsElement));
                     profile.setSshHostPort(sshHostPort);
 
                     int sshProxyPort = XMLUtilities.getElementAsInt(XMLUtilities.getFirstElementByName("ProxyPort", sshSettingsElement));
-                    profile.setSshProxyPort(sshProxyPort);
+                    profile.setProxyPort(sshProxyPort);
 
                     String sshUsername = XMLUtilities.getFirstElementByName("Username", sshSettingsElement).getTextContent();
                     profile.setSshUsername(sshUsername);
@@ -57,7 +57,7 @@ public class ProfileManager {
                     profile.setSshPassword(sshPassword); //TODO: Encrypt/Decrypt Password
 
                     File sshPrivateKey = new File(XMLUtilities.getFirstElementByName("PrivateKey", sshSettingsElement).getTextContent());
-                    profile.setSshPrivateKey(sshPrivateKey);
+                    profile.setSshRsaPrivateKeyFile(sshPrivateKey);
 
                     profiles[i] = profile;
                 }

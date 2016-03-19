@@ -70,7 +70,7 @@ public class ProxyManagerTest {
     }
 
     private void assertProxySettingsCorrect(Profile profile) {
-        String correctSettings = "socks=localhost:" + profile.getSshProxyPort();
+        String correctSettings = "socks=" + (profile.getProxyHostName() != null && !profile.getProxyHostName().isEmpty() ? profile.getProxyHostName() : "127.0.0.1") + ":" + (profile.getProxyPort() > 0 ? profile.getProxyPort() : 2000);
         String currentSettings = Advapi32Util.registryGetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY, "ProxyServer");
         assertEquals("Proxy Settings are Incorrect", correctSettings, currentSettings);
     }

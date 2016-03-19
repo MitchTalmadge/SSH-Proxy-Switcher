@@ -1,5 +1,6 @@
 package com.mitchtalmadge.sshproxyswitcher;
 
+import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconImage;
 import javafx.scene.image.Image;
 
 import javax.imageio.ImageIO;
@@ -15,20 +16,17 @@ public class Versioning {
     public static final String PROGRAM_NAME_NO_SPACES = "SSH-Proxy-Switcher";
     public static final int APTIAPI_PROJECT_ID = 2;
     private static String logoImageLocation = "/images/Logo-32px.png";
-    private static String logoTrayIconImageLocation = "/images/Logo-16px.png";
-    private static String logoTrayIconGreenImageLocation = "/images/Logo-16px-Green.png";
-    private static String logoTrayIconRedImageLocation = "/images/Logo-16px-Red.png";
     private static BufferedImage logoImage = null;
-    private static BufferedImage logoTrayIconImage = null;
-    private static BufferedImage logoTrayIconImageGreen = null;
-    private static BufferedImage logoTrayIconImageRed = null;
+
+    private static BufferedImage[] trayIconImages;
 
     static {
         try {
             logoImage = ImageIO.read(Versioning.class.getResource(logoImageLocation));
-            logoTrayIconImage = ImageIO.read(Versioning.class.getResource(logoTrayIconImageLocation));
-            logoTrayIconImageGreen = ImageIO.read(Versioning.class.getResource(logoTrayIconGreenImageLocation));
-            logoTrayIconImageRed = ImageIO.read(Versioning.class.getResource(logoTrayIconRedImageLocation));
+            trayIconImages = new BufferedImage[TrayIconImage.values().length];
+            for (int i = 0; i < TrayIconImage.values().length; i++) {
+                trayIconImages[i] = ImageIO.read(TrayIconImage.class.getResource(TrayIconImage.values()[i].getImagePath()));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,8 +40,15 @@ public class Versioning {
         return logoImage;
     }
 
-    public static BufferedImage getLogoTrayIcon() {
-        return logoTrayIconImage;
+    public static BufferedImage getTrayIconImage(TrayIconImage image) {
+        int index = 0;
+        for (int i = 0; i < TrayIconImage.values().length; i++)
+            if (TrayIconImage.values()[i].name().equals(image.name())) {
+                index = i;
+                break;
+            }
+
+        return trayIconImages[index];
     }
 
     public static Image getLogoAsJavaFXImage() {

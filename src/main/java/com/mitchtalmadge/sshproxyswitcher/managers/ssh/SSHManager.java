@@ -1,5 +1,6 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.ssh;
 
+import com.jcraft.jsch.IdentityRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -15,12 +16,12 @@ public class SSHManager {
     protected static Session createSessionFromProfile(Profile profile) throws JSchException {
         JSch jSch = new JSch();
 
-        if (profile.getSshPrivateKey() != null)
-            jSch.addIdentity(profile.getSshPrivateKey().getAbsolutePath());
+        if (profile.getSshRsaPrivateKeyFile() != null)
+            jSch.addIdentity(profile.getSshRsaPrivateKeyFile().getAbsolutePath());
 
-        Session session = jSch.getSession(profile.getSshUsername(), profile.getSshHostAddress(), profile.getSshHostPort());
+        Session session = jSch.getSession(profile.getSshUsername(), profile.getSshHostName(), profile.getSshHostPort());
         session.setPassword(profile.getSshPassword());
-        session.setPortForwardingL(profile.getSshProxyPort(), profile.getSshHostAddress(), profile.getSshHostPort());
+        session.setPortForwardingL(profile.getProxyPort(), profile.getSshHostName(), profile.getSshHostPort());
 
         return session;
     }
