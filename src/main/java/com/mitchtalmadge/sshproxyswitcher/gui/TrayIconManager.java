@@ -43,7 +43,7 @@ public class TrayIconManager implements ActionListener {
             exitItem.addActionListener(this);
             popupMenu.add(exitItem);
 
-            trayIcon = new TrayIcon(Versioning.getLogoAsBufferedImage(), "SSH Proxy Switcher", popupMenu);
+            trayIcon = new TrayIcon(Versioning.getLogoTrayIcon(), "SSH Proxy Switcher", popupMenu);
             trayIcon.setPopupMenu(popupMenu);
 
             trayIcon.addActionListener(this);

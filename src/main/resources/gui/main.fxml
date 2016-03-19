@@ -10,7 +10,7 @@
    <left>
       <BorderPane BorderPane.alignment="CENTER">
          <top>
-            <Label text="Profiles" BorderPane.alignment="CENTER">
+            <Label text="Profiles" BorderPane.alignment="CENTER_LEFT">
                <font>
                   <Font size="18.0" />
                </font>
@@ -36,7 +36,7 @@
       </BorderPane>
    </left>
    <top>
-      <Label text="SSH Proxy Switcher" BorderPane.alignment="CENTER">
+      <Label fx:id="headerLabel" contentDisplay="RIGHT" text="SSH Proxy Switcher" BorderPane.alignment="CENTER">
          <font>
             <Font size="24.0" />
          </font>
@@ -45,7 +45,7 @@
    <center>
       <BorderPane BorderPane.alignment="CENTER">
          <top>
-            <Label text="Configuration" BorderPane.alignment="CENTER">
+            <Label text="Configuration" BorderPane.alignment="CENTER_LEFT">
                <font>
                   <Font size="18.0" />
                </font>

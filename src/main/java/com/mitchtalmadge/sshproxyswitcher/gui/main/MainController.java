@@ -1,12 +1,15 @@
 package com.mitchtalmadge.sshproxyswitcher.gui.main;
 
+import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
@@ -14,6 +17,12 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
+
+    /**
+     * The header label.
+     */
+    @FXML
+    private Label headerLabel;
 
     /**
      * A tree containing a list of saved profiles.
@@ -125,7 +134,7 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        //this.headerLabel.setGraphic(new ImageView(Versioning.getLogoAsJavaFXImage()));
     }
 
     /**
