@@ -110,6 +110,7 @@ public class ProfileManager {
         if (connectedProfile != null) {
             SSHProxySwitcher.getInstance().getSSHManager().stopConnection();
             SSHProxySwitcher.getInstance().getProxyManager().disableProxySettings();
+            connectedProfile = null;
         }
         SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_DEFAULT);
     }

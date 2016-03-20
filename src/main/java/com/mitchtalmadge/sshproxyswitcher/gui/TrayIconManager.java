@@ -68,15 +68,23 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
 
         popupMenu.addSeparator();
 
+        Profile connectedProfile = SSHProxySwitcher.getInstance().getProfileManager().getConnectedProfile();
+
         disconnectItem = new MenuItem("Disconnect");
         disconnectItem.addActionListener(this);
+        disconnectItem.setEnabled(connectedProfile != null);
         popupMenu.add(disconnectItem);
 
         if (profiles != null) {
             popupMenu.addSeparator();
 
             for (Profile profile : profiles) {
-                ProfileMenuItem menuItem = new ProfileMenuItem("Use " + profile.getProfileName(), profile);
+                String itemValue = "";
+                if (connectedProfile != null && connectedProfile.getProfileName().equals(profile.getProfileName()))
+                    itemValue = "✓ " + profile.getProfileName();
+                else
+                    itemValue = profile.getProfileName();
+                ProfileMenuItem menuItem = new ProfileMenuItem(itemValue, profile);
                 menuItem.addActionListener(this);
                 popupMenu.add(menuItem);
             }
@@ -91,15 +99,21 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
         return popupMenu;
     }
 
+    private void refreshPopupMenu() {
+        trayIcon.setPopupMenu(buildPopupMenu(SSHProxySwitcher.getInstance().getProfileManager().getLoadedProfiles()));
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(openItem)) {
             SSHProxySwitcher.getInstance().showMainWindow();
         } else if (e.getSource().equals(disconnectItem)) {
             SSHProxySwitcher.getInstance().getProfileManager().disconnectProfiles();
+            refreshPopupMenu();
         } else if (e.getSource() instanceof ProfileMenuItem) {
             Profile profile = ((ProfileMenuItem) e.getSource()).getOwningProfile();
             SSHProxySwitcher.getInstance().getProfileManager().connectProfile(profile);
+            refreshPopupMenu();
         } else if (e.getSource().equals(exitItem)) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Exiting SSH Proxy Switcher");
             Platform.exit();
@@ -128,7 +142,7 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
 
     @Override
     public void loadedProfilesUpdated(ArrayList<Profile> loadedProfiles) {
-        trayIcon.setPopupMenu(buildPopupMenu(loadedProfiles));
+        refreshPopupMenu();
     }
 
     private class ProfileMenuItem extends MenuItem {

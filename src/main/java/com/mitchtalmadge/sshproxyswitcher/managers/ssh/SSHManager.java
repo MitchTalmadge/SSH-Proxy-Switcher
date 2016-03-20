@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
+import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 
 import java.util.Hashtable;
@@ -106,6 +107,8 @@ public class SSHManager {
                 try {
                     reconnectToSession();
                 } catch (Exception e) {
+                    SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+                    e.printStackTrace();
                     break;
                 }
             }
@@ -114,8 +117,10 @@ public class SSHManager {
 
         private void reconnectToSession() throws JSchException, InterruptedException {
             if (!session.isConnected()) {
+                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTING);
                 session = createSessionFromProfile(profile);
                 session.connect(3000);
+                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
             }
         }
 
