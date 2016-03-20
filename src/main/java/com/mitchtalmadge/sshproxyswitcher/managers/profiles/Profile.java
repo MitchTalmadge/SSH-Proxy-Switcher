@@ -1,24 +1,20 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
-import java.io.File;
+import java.io.Serializable;
 
-public class Profile {
+public class Profile implements Serializable {
     private String profileName;
     private boolean connectToSsh;
     private String sshHostName;
     private int sshHostPort;
     private String sshUsername;
     private String sshPassword;
-    private File sshRsaPrivateKeyFile;
+    private String sshRsaPrivateKeyFilePath;
     private String sshRsaPrivateKeyPassword;
     private boolean autoEnableProxy;
     private boolean useSshDynamicTunnel;
     private String proxyHostName;
     private int proxyPort;
-
-    public Profile() {
-
-    }
 
     public Profile(String name) {
         profileName = name;
@@ -31,7 +27,7 @@ public class Profile {
         sshHostPort = otherProfile.getSshHostPort();
         sshUsername = otherProfile.getSshUsername();
         sshPassword = otherProfile.getSshPassword();
-        sshRsaPrivateKeyFile = otherProfile.getSshRsaPrivateKeyFile();
+        sshRsaPrivateKeyFilePath = otherProfile.getSshRsaPrivateKeyFilePath();
         sshRsaPrivateKeyPassword = otherProfile.getSshRsaPrivateKeyPassword();
         autoEnableProxy = otherProfile.shouldAutoEnableProxy();
         useSshDynamicTunnel = otherProfile.shouldUseSshDynamicTunnel();
@@ -87,12 +83,12 @@ public class Profile {
         this.sshPassword = sshPassword;
     }
 
-    public File getSshRsaPrivateKeyFile() {
-        return sshRsaPrivateKeyFile;
+    public String getSshRsaPrivateKeyFilePath() {
+        return sshRsaPrivateKeyFilePath;
     }
 
-    public void setSshRsaPrivateKeyFile(File sshRsaPrivateKeyFile) {
-        this.sshRsaPrivateKeyFile = sshRsaPrivateKeyFile;
+    public void setSshRsaPrivateKeyFilePath(String sshRsaPrivateKeyFilePath) {
+        this.sshRsaPrivateKeyFilePath = sshRsaPrivateKeyFilePath;
     }
 
     public String getSshRsaPrivateKeyPassword() {
@@ -133,5 +129,10 @@ public class Profile {
 
     public void setProxyPort(int proxyPort) {
         this.proxyPort = proxyPort;
+    }
+
+    @Override
+    public String toString() {
+        return profileName;
     }
 }

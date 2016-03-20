@@ -1,119 +1,96 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
-import com.mitchtalmadge.sshproxyswitcher.utilities.XMLUtilities;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
+import com.mitchtalmadge.sshproxyswitcher.utilities.FileUtilities;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
 
 public class ProfileManager {
 
-    private ArrayList<Profile> loadedProfiles;
+    protected static final File profilesFile = new File(FileUtilities.getRootDirectory() + "/profiles.ser");
+    protected ArrayList<Profile> loadedProfiles;
 
-    public void loadProfilesFromXmlFile(File xmlFile) {
-        if (!xmlFile.exists())
-            createXmlFile(xmlFile);
-        if (!isXmlFileValid(xmlFile))
-            createXmlFile(xmlFile);
-        try {
-            Document parsedDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFile);
-            if (parsedDocument.getDocumentElement().getTagName().equals("Profiles")) {
-                NodeList profileList = parsedDocument.getDocumentElement().getElementsByTagName("Profile");
-                Profile[] profiles = new Profile[profileList.getLength()];
-                for (int i = 0; i < profileList.getLength(); i++) {
-                    Profile profile = new Profile();
-                    Element profileElement = (Element) profileList.item(i);
+    protected ArrayList<LoadedProfilesListener> listeners = new ArrayList<>();
 
-                    profile.setProfileName(profileElement.getAttribute("name"));
+    public void saveProfiles() {
+        if (loadedProfiles != null) {
+            try {
+                FileOutputStream fileOutputStream = new FileOutputStream(profilesFile);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
 
-                    Element sshSettingsElement = XMLUtilities.getFirstElementByName("SSHSettings", profileElement);
+                int profilesCount = loadedProfiles.size(); //Used to specify how many profiles are saved, and how many should be loaded.
+                objectOutputStream.writeInt(profilesCount);
 
-                    String sshHostAddress = XMLUtilities.getFirstElementByName("HostAddress", sshSettingsElement).getTextContent();
-                    profile.setSshHostName(sshHostAddress);
-
-                    int sshHostPort = XMLUtilities.getElementAsInt(XMLUtilities.getFirstElementByName("HostPort", sshSettingsElement));
-                    profile.setSshHostPort(sshHostPort);
-
-                    int sshProxyPort = XMLUtilities.getElementAsInt(XMLUtilities.getFirstElementByName("ProxyPort", sshSettingsElement));
-                    profile.setProxyPort(sshProxyPort);
-
-                    String sshUsername = XMLUtilities.getFirstElementByName("Username", sshSettingsElement).getTextContent();
-                    profile.setSshUsername(sshUsername);
-
-                    String sshPassword = XMLUtilities.getFirstElementByName("Password", sshSettingsElement).getTextContent();
-                    profile.setSshPassword(sshPassword); //TODO: Encrypt/Decrypt Password
-
-                    File sshPrivateKey = new File(XMLUtilities.getFirstElementByName("PrivateKey", sshSettingsElement).getTextContent());
-                    profile.setSshRsaPrivateKeyFile(sshPrivateKey);
-
-                    profiles[i] = profile;
+                for (Profile profile : loadedProfiles) {
+                    objectOutputStream.writeObject(profile);
                 }
-                this.loadedProfiles = new ArrayList<>();
-                loadedProfiles.addAll(Arrays.asList(profiles));
+                objectOutputStream.close();
+                fileOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            e.printStackTrace();
         }
     }
 
-    private boolean isXmlFileValid(File xmlFile) {
+    public void loadProfiles() {
+        loadedProfiles = new ArrayList<>();
+
         try {
-            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            documentBuilder.setErrorHandler(new ErrorHandler() { //Prevent from printing to System.err
-                @Override
-                public void warning(SAXParseException e) throws SAXException {
-                    ;
-                }
+            FileInputStream fileInputStream = new FileInputStream(profilesFile);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            int profilesCount = objectInputStream.readInt();
 
-                @Override
-                public void fatalError(SAXParseException e) throws SAXException {
-                    throw e;
-                }
-
-                @Override
-                public void error(SAXParseException e) throws SAXException {
-                    throw e;
-                }
-            });
-            Document document = documentBuilder.parse(xmlFile);
-            return document.getDocumentElement().getTagName().equals("Profiles");
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            return false;
-        }
-    }
-
-    private void createXmlFile(File xmlFile) {
-        try {
-            Document newDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-            Element documentElement = newDocument.createElement("Profiles");
-            newDocument.appendChild(documentElement);
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-            Result output = new StreamResult(xmlFile);
-            Source input = new DOMSource(newDocument);
-            transformer.transform(input, output);
-        } catch (ParserConfigurationException | TransformerException e) {
+            for (int i = 0; i < profilesCount; i++) {
+                Profile loadedProfile = (Profile) objectInputStream.readObject();
+                loadedProfiles.add(loadedProfile);
+            }
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        for (LoadedProfilesListener listener : listeners)
+            listener.loadedProfilesUpdated(loadedProfiles);
     }
 
     public ArrayList<Profile> getLoadedProfiles() {
         return loadedProfiles;
+    }
+
+    public void addProfile(Profile profileToAdd) {
+        if (loadedProfiles == null)
+            loadProfiles();
+
+        loadedProfiles.add(profileToAdd);
+
+        for (LoadedProfilesListener listener : listeners)
+            listener.loadedProfilesUpdated(loadedProfiles);
+
+        saveProfiles();
+    }
+
+    public void deleteProfile(Profile profileToDelete) {
+        if (loadedProfiles == null)
+            loadProfiles();
+
+        Iterator<Profile> profileIterator = loadedProfiles.iterator();
+        while (profileIterator.hasNext()) {
+            Profile profile = profileIterator.next();
+            if (profile.getProfileName().equals(profileToDelete.getProfileName()))
+                profileIterator.remove();
+        }
+
+        for (LoadedProfilesListener listener : listeners)
+            listener.loadedProfilesUpdated(loadedProfiles);
+
+        saveProfiles();
+    }
+
+    public void addLoadedProfilesListener(LoadedProfilesListener listener) {
+        listeners.add(listener);
+    }
+
+    public interface LoadedProfilesListener {
+        void loadedProfilesUpdated(ArrayList<Profile> loadedProfiles);
     }
 }

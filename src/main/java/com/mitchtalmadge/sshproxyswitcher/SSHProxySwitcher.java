@@ -28,6 +28,7 @@ public class SSHProxySwitcher extends Application {
     private static final File LOG_DIR = new File(FileUtilities.getRootDirectory(), "logs");
     private static final File XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
     private static final File PROPERTIES_FILE = new File(FileUtilities.getRootDirectory(), "SSHProxySwitcher.config");
+    private static SSHProxySwitcher instance;
     private LoggingManager loggingManager;
     private PropertiesManager propertiesManager;
     private ProfileManager profileManager;
@@ -37,12 +38,17 @@ public class SSHProxySwitcher extends Application {
 
     private Stage stage;
 
+    public static SSHProxySwitcher getInstance() {
+        return instance;
+    }
+
     public static void main(String... args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        instance = this;
 
         if (!isWindows()) {
             GUIHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
@@ -65,7 +71,7 @@ public class SSHProxySwitcher extends Application {
 
         loggingManager.log(Level.INFO, "Reading Profiles");
         this.profileManager = new ProfileManager();
-        profileManager.loadProfilesFromXmlFile(XML_FILE);
+        profileManager.loadProfiles();
 
         loggingManager.log(Level.INFO, "Starting SSH Service");
         this.sshManager = new SSHManager();
@@ -74,7 +80,7 @@ public class SSHProxySwitcher extends Application {
         this.proxyManager = new ProxyManager();
 
         loggingManager.log(Level.INFO, "Starting Tray Icon Service");
-        this.trayIconManager = new TrayIconManager(this);
+        this.trayIconManager = new TrayIconManager();
 
         loggingManager.log(Level.INFO, "Loading User Interface");
         Platform.setImplicitExit(false); //Prevent application from closing when window is hidden.
@@ -162,4 +168,7 @@ public class SSHProxySwitcher extends Application {
         });
     }
 
+    public ProxyManager getProxyManager() {
+        return proxyManager;
+    }
 }

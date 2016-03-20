@@ -17,8 +17,7 @@ public class ExampleProfileFactory {
     private static final Profile INVALID_PROXY_PROFILE;
 
     static {
-        VALID_PROFILE = new Profile();
-        VALID_PROFILE.setProfileName("Valid Profile");
+        VALID_PROFILE = new Profile("Valid Profile");
         VALID_PROFILE.setSshHostName(CORRECT_HOST);
         VALID_PROFILE.setSshHostPort(CORRECT_HOST_PORT);
         VALID_PROFILE.setSshUsername(USERNAME);

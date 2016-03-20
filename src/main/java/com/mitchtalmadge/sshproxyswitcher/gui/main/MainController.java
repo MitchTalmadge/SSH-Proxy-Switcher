@@ -1,22 +1,22 @@
 package com.mitchtalmadge.sshproxyswitcher.gui.main;
 
-import com.mitchtalmadge.sshproxyswitcher.Versioning;
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
+import com.mitchtalmadge.sshproxyswitcher.managers.profiles.ProfileManager;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
-public class MainController implements Initializable {
+public class MainController implements Initializable, ProfileManager.LoadedProfilesListener, ChangeListener<Profile> {
 
     /**
      * The header label.
@@ -74,7 +74,7 @@ public class MainController implements Initializable {
      * A field containing the SSH Password - Optional
      */
     @FXML
-    private TextField sshPasswordField;
+    private PasswordField sshPasswordField;
 
     /**
      * A field containing the SSH RSA Key Path. Should be set by the browse button. The user does not have access to edit this field.
@@ -86,7 +86,7 @@ public class MainController implements Initializable {
      * A field containing the SSH RSA Key Password - Optional
      */
     @FXML
-    private TextField sshRsaKeyPasswordField;
+    private PasswordField sshRsaKeyPasswordField;
 
     /* END SSH CONFIG */
 
@@ -134,6 +134,51 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        SSHProxySwitcher.getInstance().getProfileManager().addLoadedProfilesListener(this);
+
+        refreshProfilesList();
+
+        profileListView.getSelectionModel().selectedItemProperty().addListener(this);
+    }
+
+    private void refreshProfilesList() {
+        ArrayList<Profile> profilesList = SSHProxySwitcher.getInstance().getProfileManager().getLoadedProfiles();
+        if (profilesList != null) {
+            profileListView.getItems().clear();
+            profileListView.getItems().addAll(profilesList);
+            if (profilesList.size() > 0) {
+                profileListView.getSelectionModel().select(0);
+                setConfigurationFields(profileListView.getSelectionModel().getSelectedItem());
+            }
+        }
+    }
+
+    private void setConfigurationFields(Profile profile) {
+        this.profileNameField.setText(profile.getProfileName());
+
+        this.connectToSSHCheck.setSelected(profile.shouldConnectToSsh());
+        updateSshConfigurationDisable();
+        this.sshHostNameField.setText(profile.getSshHostName());
+        this.sshPortField.setText(profile.getSshHostPort() + "");
+        this.sshUsernameField.setText(profile.getSshUsername());
+        this.sshPasswordField.setText(profile.getSshPassword());
+        this.sshRsaKeyPathField.setText(profile.getSshRsaPrivateKeyFilePath());
+        this.sshRsaKeyPasswordField.setText(profile.getSshRsaPrivateKeyPassword());
+
+        this.proxyAutosetCheck.setSelected(profile.shouldAutoEnableProxy());
+        this.proxyTunnelCheck.setSelected(profile.shouldUseSshDynamicTunnel());
+
+        updateProxyConfigurationDisable();
+        this.proxyHostNameField.setText(profile.getProxyHostName());
+        this.proxyPortField.setText(profile.getProxyPort() + "");
+    }
+
+    private void updateSshConfigurationDisable() {
+        this.sshServerConfiguration.setDisable(!connectToSSHCheck.isSelected());
+    }
+
+    private void updateProxyConfigurationDisable() {
+        this.proxyConfiguration.setDisable(!(proxyAutosetCheck.isSelected() || proxyTunnelCheck.isSelected()));
     }
 
     /**
@@ -149,7 +194,7 @@ public class MainController implements Initializable {
      */
     @FXML
     void onConnectToSSHCheckFired(ActionEvent event) {
-
+        updateSshConfigurationDisable();
     }
 
     /**
@@ -165,7 +210,7 @@ public class MainController implements Initializable {
      */
     @FXML
     void onProxyTunnelCheckFired(ActionEvent event) {
-
+        updateProxyConfigurationDisable();
     }
 
     /**
@@ -173,7 +218,7 @@ public class MainController implements Initializable {
      */
     @FXML
     void onProxyAutosetCheckFired(ActionEvent event) {
-
+        updateProxyConfigurationDisable();
     }
 
     /**
@@ -192,4 +237,13 @@ public class MainController implements Initializable {
 
     }
 
+    @Override
+    public void loadedProfilesUpdated(ArrayList<Profile> loadedProfiles) {
+        refreshProfilesList();
+    }
+
+    @Override
+    public void changed(ObservableValue<? extends Profile> observable, Profile oldValue, Profile newValue) {
+        setConfigurationFields(newValue);
+    }
 }

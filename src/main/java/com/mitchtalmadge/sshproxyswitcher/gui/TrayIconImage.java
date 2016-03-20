@@ -4,6 +4,7 @@ public enum TrayIconImage {
 
     DEFAULT("/images/Logo-16px.png"),
     RED("/images/Logo-16px-Red.png"),
+    YELLOW("/images/Logo-16px-Yellow.png"),
     GREEN("/images/Logo-16px-Green.png");
 
     private String imagePath;

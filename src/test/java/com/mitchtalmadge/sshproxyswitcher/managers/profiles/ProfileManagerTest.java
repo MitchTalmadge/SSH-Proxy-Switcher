@@ -1,5 +1,6 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
+import com.mitchtalmadge.sshproxyswitcher.ExampleProfileFactory;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,12 +21,10 @@ import static org.junit.Assert.*;
 
 public class ProfileManagerTest {
 
-    private static File xmlFile;
     private ProfileManager profileManager;
 
     @BeforeClass
     public static void initialize() throws Exception {
-        xmlFile = new File("profiles.xml");
     }
 
     @Before
@@ -35,105 +34,29 @@ public class ProfileManagerTest {
     }
 
     @Test
-    public void testLoadProfilesWillNotCreateNewXMLFileIfValid() throws Exception {
-        createValidMutableProfilesXmlFile();
+    public void testProfilesAreCorrectlySavedAndLoaded() throws Exception {
 
-        long modificationTimeBefore = xmlFile.lastModified();
-        profileManager.loadProfilesFromXmlFile(xmlFile);
-        long modificationTimeAfter = xmlFile.lastModified();
-        assertEquals("XML file modification times differ!", modificationTimeBefore, modificationTimeAfter);
-    }
+        if(ProfileManager.profilesFile.exists())
+            assertTrue("Could not delete Serialized Profiles File", ProfileManager.profilesFile.delete());
 
-    @Test
-    public void testLoadProfilesWillCreateNewXMLFileCorrectlyIfInvalid() throws Exception {
-        createInvalidMutableProfilesXmlFile();
+        Profile testProfile1 = ExampleProfileFactory.getValidProfile();
+        testProfile1.setProfileName("Test Profile 1");
+        Profile testProfile2 = ExampleProfileFactory.getValidProfile();
+        testProfile2.setProfileName("Test Profile 2");
 
-        profileManager.loadProfilesFromXmlFile(xmlFile);
-        assertTrue("ProfileManager did not create a new XML file.", xmlFile.exists());
+        profileManager.loadedProfiles = new ArrayList<>();
+        profileManager.loadedProfiles.add(testProfile1);
+        profileManager.loadedProfiles.add(testProfile2);
 
-        checkXmlFileValidity();
-    }
+        profileManager.saveProfiles();
 
-    @Test
-    public void testLoadProfilesWillCreateNewXMLFileCorrectlyIfNotExists() throws Exception {
-        deleteMutableProfilesXmlFile();
+        assertTrue("Serialized Profiles File does not exist!", ProfileManager.profilesFile.exists());
 
-        profileManager.loadProfilesFromXmlFile(xmlFile);
-        assertTrue("ProfileManager did not create a new XML file.", xmlFile.exists());
+        profileManager.loadProfiles();
 
-        checkXmlFileValidity();
-    }
+        assertTrue("The number of profiles loaded was not 2!", profileManager.loadedProfiles.size() == 2);
 
-    @Test
-    public void testLoadProfilesWillLoadCorrectProfiles() throws Exception {
-        createValidMutableProfilesXmlFile();
-
-        profileManager.loadProfilesFromXmlFile(xmlFile);
-        ArrayList<Profile> profiles = profileManager.getLoadedProfiles();
-
-        assertNotNull("Profiles List is null", profiles);
-        assertEquals("An incorrect number of profiles were loaded", 2, profiles.size());
-
-        Profile profile = profiles.get(0);
-        assertEquals("Profile Name is incorrect", "Profile 1", profile.getProfileName());
-        assertEquals("SSH Host Address is incorrect", "test.com", profile.getSshHostName());
-        assertEquals("SSH Host Port is incorrect", 22, profile.getSshHostPort());
-        assertEquals("SSH Proxy Port is incorrect", 2000, profile.getProxyPort());
-        assertEquals("SSH Username is incorrect", "root", profile.getSshUsername());
-        assertEquals("SSH Password is incorrect", "password", profile.getSshPassword());
-        assertEquals("SSH Private Key is incorrect", new File("id_rsa"), profile.getSshRsaPrivateKeyFile());
-    }
-
-    private void deleteMutableProfilesXmlFile() {
-        if (xmlFile.exists())
-            try {
-                Files.delete(xmlFile.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        assertFalse("Old XML file still exists.", xmlFile.exists());
-    }
-
-    private void createInvalidMutableProfilesXmlFile() throws IOException {
-        if (xmlFile.exists())
-            deleteMutableProfilesXmlFile();
-        Files.copy(getClass().getResourceAsStream("/invalidProfiles.xml"), xmlFile.toPath());
-        assertTrue("XML file does not exist.", xmlFile.exists());
-    }
-
-    private void createValidMutableProfilesXmlFile() throws IOException {
-        if (xmlFile.exists())
-            deleteMutableProfilesXmlFile();
-        Files.copy(getClass().getResourceAsStream("/validProfiles.xml"), xmlFile.toPath());
-        assertTrue("XML file does not exist.", xmlFile.exists());
-    }
-
-    private void checkXmlFileValidity() {
-        try {
-            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            documentBuilder.setErrorHandler(new ErrorHandler() {
-                @Override
-                public void warning(SAXParseException e) throws SAXException {
-                    ;
-                }
-
-                @Override
-                public void fatalError(SAXParseException e) throws SAXException {
-                    throw e;
-                }
-
-                @Override
-                public void error(SAXParseException e) throws SAXException {
-                    throw e;
-                }
-            });
-            Document document = documentBuilder.parse(xmlFile);
-
-            assertTrue("ProfileManager did not create the XML file correctly.", document.getDocumentElement().getTagName().equals("Profiles"));
-        } catch (SAXParseException e) {
-            fail("Exception thrown while trying to parse XML file:\n" + e.toString());
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            e.printStackTrace();
-        }
+        assertTrue("The first profile name is invalid!", profileManager.loadedProfiles.get(0).getProfileName().equals(testProfile1.getProfileName()));
+        assertTrue("The second profile name is invalid!", profileManager.loadedProfiles.get(1).getProfileName().equals(testProfile2.getProfileName()));
     }
 }

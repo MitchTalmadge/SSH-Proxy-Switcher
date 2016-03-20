@@ -88,7 +88,7 @@
                               <Label text="Username" />
                               <TextField fx:id="sshUsernameField" promptText="Required" GridPane.rowIndex="1" />
                               <Label text="Password" GridPane.columnIndex="1" />
-                              <TextField fx:id="sshPasswordField" promptText="Optional" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <PasswordField fx:id="sshPasswordField" promptText="Optional" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                         <GridPane hgap="5.0">
@@ -106,7 +106,7 @@
                               <TextField fx:id="sshRsaKeyPathField" promptText="Private Key Path" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSshRsaBrowseButtonFired" text="Browse..." GridPane.rowIndex="1" />
                               <Label text="RSA Private Key Password" GridPane.columnIndex="2" />
-                              <TextField fx:id="sshRsaKeyPasswordField" promptText="Optional" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                              <PasswordField fx:id="sshRsaKeyPasswordField" promptText="Optional" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                      </children>
