@@ -5,6 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
+<?import com.mitchtalmadge.sshproxyswitcher.gui.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mitchtalmadge.sshproxyswitcher.gui.main.MainController">
    <left>
@@ -43,7 +44,7 @@
       </Label>
    </top>
    <center>
-      <BorderPane BorderPane.alignment="CENTER">
+      <BorderPane fx:id="configurationPane" BorderPane.alignment="CENTER">
          <top>
             <Label text="Configuration" BorderPane.alignment="CENTER_LEFT">
                <font>
@@ -55,7 +56,7 @@
             <VBox prefHeight="300.0" prefWidth="400.0" spacing="5.0">
                <children>
                   <Label text="Profile Name" />
-                  <TextField fx:id="profileNameField" promptText="Required" />
+                  <LimitingTextField fx:id="profileNameField" promptText="Required" />
                   <CheckBox fx:id="connectToSSHCheck" mnemonicParsing="false" onAction="#onConnectToSSHCheckFired" text="Connect to an SSH Server" />
                   <VBox fx:id="sshServerConfiguration">
                      <children>
@@ -70,8 +71,8 @@
                           </rowConstraints>
                            <children>
                               <Label text="Host Name" />
-                              <TextField fx:id="sshHostNameField" promptText="Required" GridPane.rowIndex="1" />
-                              <TextField fx:id="sshPortField" promptText="Default: 22" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <LimitingTextField fx:id="sshHostNameField" promptText="Required" GridPane.rowIndex="1" />
+                              <LimitingTextField fx:id="sshPortField" promptText="Default: 22" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <Label text="Port" GridPane.columnIndex="1" />
                            </children>
                         </GridPane>
@@ -86,7 +87,7 @@
                           </rowConstraints>
                            <children>
                               <Label text="Username" />
-                              <TextField fx:id="sshUsernameField" promptText="Required" GridPane.rowIndex="1" />
+                              <LimitingTextField fx:id="sshUsernameField" promptText="Required" GridPane.rowIndex="1" />
                               <Label text="Password" GridPane.columnIndex="1" />
                               <PasswordField fx:id="sshPasswordField" promptText="Optional" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                            </children>
@@ -103,7 +104,7 @@
                           </rowConstraints>
                            <children>
                               <Label prefHeight="17.0" prefWidth="176.0" text="RSA Private Key File" GridPane.columnSpan="2" />
-                              <TextField fx:id="sshRsaKeyPathField" promptText="Private Key Path" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="sshRsaKeyPathField" editable="false" mouseTransparent="true" promptText="Private Key Path" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSshRsaBrowseButtonFired" text="Browse..." GridPane.rowIndex="1" />
                               <Label text="RSA Private Key Password" GridPane.columnIndex="2" />
                               <PasswordField fx:id="sshRsaKeyPasswordField" promptText="Optional" GridPane.columnIndex="2" GridPane.rowIndex="1" />
@@ -130,9 +131,9 @@
                           </rowConstraints>
                            <children>
                               <Label text="Proxy Port" GridPane.columnIndex="1" />
-                              <TextField fx:id="proxyPortField" promptText="Default: 2000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <LimitingTextField fx:id="proxyPortField" promptText="Default: 2000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                               <Label text="Proxy Host Name" />
-                              <TextField fx:id="proxyHostNameField" promptText="Default: 127.0.0.1" GridPane.rowIndex="1" />
+                              <LimitingTextField fx:id="proxyHostNameField" promptText="Default: 127.0.0.1" GridPane.rowIndex="1" />
                            </children>
                         </GridPane>
                      </children>

@@ -1,6 +1,8 @@
 package com.mitchtalmadge.sshproxyswitcher.gui.main;
 
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
+import com.mitchtalmadge.sshproxyswitcher.gui.GUIHelper;
+import com.mitchtalmadge.sshproxyswitcher.gui.LimitingTextField;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.ProfileManager;
 import javafx.beans.value.ChangeListener;
@@ -9,9 +11,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -25,6 +30,12 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
     private Label headerLabel;
 
     /**
+     * The entire Configuration Panel
+     */
+    @FXML
+    private BorderPane configurationPane;
+
+    /**
      * A tree containing a list of saved profiles.
      */
     @FXML
@@ -36,7 +47,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      * A field containing the name of the profile.
      */
     @FXML
-    private TextField profileNameField;
+    private LimitingTextField profileNameField;
 
     /* BEGIN SSH CONFIG */
 
@@ -56,19 +67,19 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      * A field containing the SSH Host Name
      */
     @FXML
-    private TextField sshHostNameField;
+    private LimitingTextField sshHostNameField;
 
     /**
      * A field containing the SSH Port - Optional - Default: 22
      */
     @FXML
-    private TextField sshPortField;
+    private LimitingTextField sshPortField;
 
     /**
      * A field containing the SSH Username
      */
     @FXML
-    private TextField sshUsernameField;
+    private LimitingTextField sshUsernameField;
 
     /**
      * A field containing the SSH Password - Optional
@@ -114,13 +125,13 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      * The Host Name of the proxy.
      */
     @FXML
-    private TextField proxyHostNameField;
+    private LimitingTextField proxyHostNameField;
 
     /**
      * The Port of the proxy.
      */
     @FXML
-    private TextField proxyPortField;
+    private LimitingTextField proxyPortField;
 
     /* END PROXY CONFIG */
 
@@ -136,9 +147,18 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
     public void initialize(URL location, ResourceBundle resources) {
         SSHProxySwitcher.getInstance().getProfileManager().addLoadedProfilesListener(this);
 
-        refreshProfilesList();
+        //Set up limiting text fields
+        this.sshHostNameField.setRegexLimiter("[a-zA-Z0-9\\.]*");
+        this.sshPortField.setRegexLimiter("[0-9]*");
+        this.sshPortField.setMaxLength(5);
+        this.sshUsernameField.setRegexLimiter("[^\\s]*");
+
+        this.proxyHostNameField.setRegexLimiter("[a-zA-Z0-9\\.]*");
+        this.proxyPortField.setRegexLimiter("[0-9]*");
+        this.proxyPortField.setMaxLength(5);
 
         profileListView.getSelectionModel().selectedItemProperty().addListener(this);
+        refreshProfilesList();
     }
 
     private void refreshProfilesList() {
@@ -146,10 +166,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         if (profilesList != null) {
             profileListView.getItems().clear();
             profileListView.getItems().addAll(profilesList);
-            if (profilesList.size() > 0) {
-                profileListView.getSelectionModel().select(0);
-                setConfigurationFields(profileListView.getSelectionModel().getSelectedItem());
-            }
+            profileListView.getSelectionModel().select(0);
         }
     }
 
@@ -159,7 +176,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         this.connectToSSHCheck.setSelected(profile.shouldConnectToSsh());
         updateSshConfigurationDisable();
         this.sshHostNameField.setText(profile.getSshHostName());
-        this.sshPortField.setText(profile.getSshHostPort() + "");
+        this.sshPortField.setText(profile.getSshHostPort() > 0 ? profile.getSshHostPort() + "" : "");
         this.sshUsernameField.setText(profile.getSshUsername());
         this.sshPasswordField.setText(profile.getSshPassword());
         this.sshRsaKeyPathField.setText(profile.getSshRsaPrivateKeyFilePath());
@@ -170,7 +187,9 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
 
         updateProxyConfigurationDisable();
         this.proxyHostNameField.setText(profile.getProxyHostName());
-        this.proxyPortField.setText(profile.getProxyPort() + "");
+        this.proxyPortField.setText(profile.getProxyPort() > 0 ? profile.getProxyPort() + "" : "");
+
+        configurationPane.setVisible(true);
     }
 
     private void updateSshConfigurationDisable() {
@@ -186,7 +205,23 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onCreateButtonFired(ActionEvent event) {
+        String profileName = "New Profile";
+        int nameTry = 1;
 
+        boolean searching = true;
+        while (searching) {
+            searching = false;
+            for (Profile profile : SSHProxySwitcher.getInstance().getProfileManager().getLoadedProfiles()) {
+                if (profile.getProfileName().equals(profileName)) {
+                    nameTry++;
+                    profileName = "New Profile " + nameTry;
+                    searching = true;
+                }
+            }
+        }
+
+        Profile profile = new Profile(profileName);
+        SSHProxySwitcher.getInstance().getProfileManager().addProfile(profile);
     }
 
     /**
@@ -202,7 +237,12 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onSshRsaBrowseButtonFired(ActionEvent event) {
-
+        FileChooser fileChooser = new FileChooser();
+        File chosenFile = fileChooser.showOpenDialog(sshRsaKeyPathField.getScene().getWindow());
+        if(chosenFile == null)
+            sshRsaKeyPathField.setText("");
+        else
+            sshRsaKeyPathField.setText(chosenFile.getAbsolutePath());
     }
 
     /**
@@ -226,7 +266,10 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onDeleteButtonFired(ActionEvent event) {
-
+        Profile selectedProfile = profileListView.getSelectionModel().getSelectedItem();
+        if (GUIHelper.getConfirmationFromDialog("Delete?", "Deletion Confirmation", "Are you sure you want to delete " + selectedProfile.getProfileName() + "?")) {
+            SSHProxySwitcher.getInstance().getProfileManager().deleteProfile(selectedProfile);
+        }
     }
 
     /**
@@ -234,7 +277,25 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onSaveButtonFired(ActionEvent event) {
+        Profile profile = this.profileListView.getSelectionModel().getSelectedItem();
+        profile.setProfileName(this.profileNameField.getText());
 
+        profile.setConnectToSsh(this.connectToSSHCheck.isSelected());
+
+        profile.setSshHostName(this.sshHostNameField.getText());
+        profile.setSshHostPort(this.sshPortField.getText().isEmpty() ? 0 : Integer.parseInt(this.sshPortField.getText()));
+        profile.setSshUsername(this.sshUsernameField.getText());
+        profile.setSshPassword(this.sshPasswordField.getText());
+        profile.setSshRsaPrivateKeyFilePath(this.sshRsaKeyPathField.getText());
+        profile.setSshRsaPrivateKeyPassword(this.sshRsaKeyPasswordField.getText());
+
+        profile.setAutoEnableProxy(this.proxyAutosetCheck.isSelected());
+        profile.setUseSshDynamicTunnel(this.proxyTunnelCheck.isSelected());
+
+        profile.setProxyHostName(this.proxyHostNameField.getText());
+        profile.setProxyPort(this.proxyPortField.getText().isEmpty() ? 0 : Integer.parseInt(this.proxyPortField.getText()));
+
+        SSHProxySwitcher.getInstance().getProfileManager().saveProfiles();
     }
 
     @Override
@@ -244,6 +305,9 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
 
     @Override
     public void changed(ObservableValue<? extends Profile> observable, Profile oldValue, Profile newValue) {
-        setConfigurationFields(newValue);
+        if (newValue != null)
+            setConfigurationFields(newValue);
+        else
+            configurationPane.setVisible(false);
     }
 }

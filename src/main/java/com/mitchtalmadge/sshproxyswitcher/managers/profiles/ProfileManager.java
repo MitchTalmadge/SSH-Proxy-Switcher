@@ -30,6 +30,9 @@ public class ProfileManager {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            for (LoadedProfilesListener listener : listeners)
+                listener.loadedProfilesUpdated(loadedProfiles);
         }
     }
 
@@ -63,9 +66,6 @@ public class ProfileManager {
 
         loadedProfiles.add(profileToAdd);
 
-        for (LoadedProfilesListener listener : listeners)
-            listener.loadedProfilesUpdated(loadedProfiles);
-
         saveProfiles();
     }
 
@@ -79,9 +79,6 @@ public class ProfileManager {
             if (profile.getProfileName().equals(profileToDelete.getProfileName()))
                 profileIterator.remove();
         }
-
-        for (LoadedProfilesListener listener : listeners)
-            listener.loadedProfilesUpdated(loadedProfiles);
 
         saveProfiles();
     }
