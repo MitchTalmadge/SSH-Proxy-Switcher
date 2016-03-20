@@ -81,6 +81,7 @@ public class SSHProxySwitcher extends Application {
 
         loggingManager.log(Level.INFO, "Starting Tray Icon Service");
         this.trayIconManager = new TrayIconManager();
+        trayIconManager.setStatus(TrayIconManager.STATUS_DEFAULT);
 
         loggingManager.log(Level.INFO, "Loading User Interface");
         Platform.setImplicitExit(false); //Prevent application from closing when window is hidden.
@@ -109,8 +110,7 @@ public class SSHProxySwitcher extends Application {
 
         stage.hide();
 
-        loggingManager.log(Level.INFO, "Shutting down all SSH Connections");
-        sshManager.stopConnection();
+        profileManager.disconnectProfiles();
 
         loggingManager.log(Level.INFO, "Saving properties");
         propertiesManager.saveProperties();
@@ -170,5 +170,9 @@ public class SSHProxySwitcher extends Application {
 
     public ProxyManager getProxyManager() {
         return proxyManager;
+    }
+
+    public TrayIconManager getTrayIconManager() {
+        return trayIconManager;
     }
 }

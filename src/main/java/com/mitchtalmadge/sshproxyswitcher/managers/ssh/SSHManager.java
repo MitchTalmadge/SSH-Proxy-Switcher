@@ -3,10 +3,12 @@ package com.mitchtalmadge.sshproxyswitcher.managers.ssh;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 public class SSHManager {
 
@@ -15,17 +17,32 @@ public class SSHManager {
     protected static Session createSessionFromProfile(Profile profile) throws JSchException {
         JSch jSch = new JSch();
 
-        if (profile.getSshRsaPrivateKeyFilePath() != null)
-            jSch.addIdentity(profile.getSshRsaPrivateKeyFilePath());
+        String sshHostName = profile.getSshHostName();
+        int sshPort = profile.getSshHostPort() > 0 ? profile.getSshHostPort() : 22;
+        String sshUsername = profile.getSshUsername();
+        String sshPassword = profile.getSshPassword();
+        String rsaKeyPath = profile.getSshRsaPrivateKeyFilePath();
+        String rsaKeyPass = profile.getSshRsaPrivateKeyPassword();
+        int proxyPort = profile.getProxyPort() > 0 ? profile.getProxyPort() : 2000;
 
-        Session session = jSch.getSession(profile.getSshUsername(), profile.getSshHostName(), profile.getSshHostPort());
-        session.setPassword(profile.getSshPassword());
-        session.setPortForwardingL(profile.getProxyPort(), profile.getSshHostName(), profile.getSshHostPort());
+        if (rsaKeyPath != null)
+            if (!rsaKeyPass.isEmpty())
+                jSch.addIdentity(rsaKeyPath, rsaKeyPass);
+            else
+                jSch.addIdentity(rsaKeyPath);
+
+        Session session = jSch.getSession(sshUsername, sshHostName, sshPort);
+        if (!sshPassword.isEmpty())
+            session.setPassword(sshPassword);
+
+        if (profile.shouldUseSshDynamicTunnel())
+            session.setPortForwardingL(proxyPort, sshHostName, sshPort);
 
         return session;
     }
 
     public void startConnection(Profile profile) throws SSHConnectionException {
+        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connecting to SSH Server for " + profile.getProfileName());
         stopConnection();
         Hashtable<String, String> config = new Hashtable<>();
         config.put("StrictHostKeyChecking", "no");
@@ -37,6 +54,8 @@ public class SSHManager {
 
             thread = new SSHMaintainerThread(session, profile);
             thread.start();
+
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connected!");
         } catch (JSchException e) {
             throw new SSHConnectionException(e);
         }
@@ -44,6 +63,7 @@ public class SSHManager {
 
     public void stopConnection() {
         if (this.thread != null) {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnecting from SSH...");
             thread.stopRunning();
             try {
                 thread.join();
@@ -51,6 +71,7 @@ public class SSHManager {
                 e.printStackTrace();
             }
             thread = null;
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnected!");
         }
     }
 

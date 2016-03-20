@@ -198,6 +198,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
 
     private void updateProxyConfigurationDisable() {
         this.proxyConfiguration.setDisable(!(proxyAutosetCheck.isSelected() || proxyTunnelCheck.isSelected()));
+        this.proxyHostNameField.setDisable(proxyTunnelCheck.isSelected());
     }
 
     /**
@@ -239,7 +240,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
     void onSshRsaBrowseButtonFired(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         File chosenFile = fileChooser.showOpenDialog(sshRsaKeyPathField.getScene().getWindow());
-        if(chosenFile == null)
+        if (chosenFile == null)
             sshRsaKeyPathField.setText("");
         else
             sshRsaKeyPathField.setText(chosenFile.getAbsolutePath());

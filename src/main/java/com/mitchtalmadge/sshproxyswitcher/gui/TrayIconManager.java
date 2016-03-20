@@ -4,8 +4,6 @@ import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.ProfileManager;
-import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxySettingsException;
-import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHConnectionException;
 import javafx.application.Platform;
 
 import java.awt.*;
@@ -17,6 +15,11 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 public class TrayIconManager implements ActionListener, ProfileManager.LoadedProfilesListener {
+
+    public static final int STATUS_DEFAULT = 0;
+    public static final int STATUS_CONNECTING = 1;
+    public static final int STATUS_CONNECTED = 2;
+    public static final int STATUS_ERROR = 3;
 
     private TrayIcon trayIcon;
 
@@ -93,30 +96,33 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
         if (e.getSource().equals(openItem)) {
             SSHProxySwitcher.getInstance().showMainWindow();
         } else if (e.getSource().equals(disconnectItem)) {
-            SSHProxySwitcher.getInstance().getSSHManager().stopConnection();
-            SSHProxySwitcher.getInstance().getProxyManager().disableProxySettings();
+            SSHProxySwitcher.getInstance().getProfileManager().disconnectProfiles();
         } else if (e.getSource() instanceof ProfileMenuItem) {
             Profile profile = ((ProfileMenuItem) e.getSource()).getOwningProfile();
-            if (profile.shouldConnectToSsh()) {
-                try {
-                    SSHProxySwitcher.getInstance().getSSHManager().startConnection(profile);
-                } catch (SSHConnectionException e1) {
-                    e1.printStackTrace();
-                }
-            }
-
-            if (profile.shouldAutoEnableProxy()) {
-                try {
-                    SSHProxySwitcher.getInstance().getProxyManager().setProxySettings(profile);
-                } catch (ProxySettingsException e1) {
-                    e1.printStackTrace();
-                }
-            }
+            SSHProxySwitcher.getInstance().getProfileManager().connectProfile(profile);
         } else if (e.getSource().equals(exitItem)) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Exiting SSH Proxy Switcher");
             Platform.exit();
         } else if (e.getSource().equals(trayIcon)) { //Double Click Icon
             SSHProxySwitcher.getInstance().showMainWindow();
+        }
+    }
+
+    public void setStatus(int status) {
+        switch (status) {
+            default:
+            case STATUS_DEFAULT:
+                trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.DEFAULT));
+                break;
+            case STATUS_CONNECTING:
+                trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.YELLOW));
+                break;
+            case STATUS_CONNECTED:
+                trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.GREEN));
+                break;
+            case STATUS_ERROR:
+                trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.RED));
+                break;
         }
     }
 

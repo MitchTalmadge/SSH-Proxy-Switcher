@@ -1,8 +1,11 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.proxies;
 
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 import com.sun.jna.platform.win32.Advapi32Util;
 import com.sun.jna.platform.win32.WinReg;
+
+import java.util.logging.Level;
 
 public class ProxyManager {
 
@@ -13,24 +16,31 @@ public class ProxyManager {
     private static final String PROXY_SETTINGS_KEY = "ProxyServer";
 
     public void setProxySettings(Profile profile) throws ProxySettingsException {
-        if (profile == null) {
+        if (profile != null) {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Checking Proxy Settings for " + profile.getProfileName() + "...");
+            if (profile.getProxyPort() < 0 || profile.getProxyPort() > 65535) {
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.SEVERE, "Port out of bounds: " + profile.getProxyPort());
+                setProxyEnabled(false);
+                throw new ProxySettingsException("Port is out of bounds: " + profile.getProxyPort());
+            } else {
+                setProxyEnabled(true);
+                setProxy(profile.getProxyHostName(), profile.getProxyPort());
+            }
+        } else {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Tried to set Proxy Settings, but profile was null.");
             setProxyEnabled(false);
             throw new ProxySettingsException("Profile is null");
-        } else if (profile.getProxyPort() < 0 || profile.getProxyPort() > 65535) {
-            setProxyEnabled(false);
-            throw new ProxySettingsException("Profile is invalid");
-        } else {
-            setProxyEnabled(true);
-            setProxy(profile.getProxyHostName(), profile.getProxyPort());
         }
     }
 
     private void setProxy(String proxyHostName, int proxyPort) {
+        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Enabling Proxy...");
         if (proxyHostName == null || proxyHostName.isEmpty())
             proxyHostName = "127.0.0.1";
         if (proxyPort == 0)
             proxyPort = 2000;
         Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, "socks=" + proxyHostName + ":" + proxyPort);
+        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Enabled!");
     }
 
     public void disableProxySettings() {

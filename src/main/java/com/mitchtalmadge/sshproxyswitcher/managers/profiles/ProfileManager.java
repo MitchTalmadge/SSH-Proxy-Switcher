@@ -1,5 +1,9 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
+import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxySettingsException;
+import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHConnectionException;
 import com.mitchtalmadge.sshproxyswitcher.utilities.FileUtilities;
 
 import java.io.*;
@@ -10,6 +14,7 @@ public class ProfileManager {
 
     protected static final File profilesFile = new File(FileUtilities.getRootDirectory() + "/profiles.ser");
     protected ArrayList<Profile> loadedProfiles;
+    protected Profile connectedProfile;
 
     protected ArrayList<LoadedProfilesListener> listeners = new ArrayList<>();
 
@@ -81,6 +86,36 @@ public class ProfileManager {
         }
 
         saveProfiles();
+    }
+
+    public void connectProfile(Profile profile) {
+        disconnectProfiles();
+        if (profile != null) {
+            SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTING);
+            try {
+                if (profile.shouldConnectToSsh())
+                    SSHProxySwitcher.getInstance().getSSHManager().startConnection(profile);
+                if (profile.shouldAutoEnableProxy())
+                    SSHProxySwitcher.getInstance().getProxyManager().setProxySettings(profile);
+                connectedProfile = profile;
+                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
+            } catch (SSHConnectionException | ProxySettingsException e) {
+                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void disconnectProfiles() {
+        if (connectedProfile != null) {
+            SSHProxySwitcher.getInstance().getSSHManager().stopConnection();
+            SSHProxySwitcher.getInstance().getProxyManager().disableProxySettings();
+        }
+        SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_DEFAULT);
+    }
+
+    public Profile getConnectedProfile() {
+        return this.connectedProfile;
     }
 
     public void addLoadedProfilesListener(LoadedProfilesListener listener) {
