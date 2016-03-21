@@ -1,42 +1,42 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
+import com.mitchtalmadge.sshproxyswitcher.utilities.Encryptable;
+
 import java.io.Serializable;
 
 
 public class Profile implements Serializable {
 
-    public static final long serialVersionUID = 100L;
+    private static final long serialVersionUID = 100L;
+
+    protected boolean encrypted = false;
 
     private String profileName = "";
-    private boolean connectToSsh;
-    private String sshHostName = "";
-    private int sshHostPort;
-    private String sshUsername = "";
-    private String sshPassword = "";
-    private String sshRsaPrivateKeyFilePath = "";
-    private String sshRsaPrivateKeyPassword = "";
-    private boolean autoEnableProxy;
-    private boolean useSshDynamicTunnel;
-    private String proxyHostName = "";
-    private int proxyPort;
+    @Encryptable
+    protected boolean connectToSsh;
+    @Encryptable
+    protected String sshHostName = "";
+    @Encryptable
+    protected int sshHostPort;
+    @Encryptable
+    protected String sshUsername = "";
+    @Encryptable
+    protected String sshPassword = "";
+    @Encryptable
+    protected String sshRsaPrivateKeyFilePath = "";
+    @Encryptable
+    protected String sshRsaPrivateKeyPassword = "";
+    @Encryptable
+    protected boolean autoEnableProxy;
+    @Encryptable
+    protected boolean useSshDynamicTunnel;
+    @Encryptable
+    protected String proxyHostName = "";
+    @Encryptable
+    protected int proxyPort;
 
     public Profile(String name) {
         profileName = name;
-    }
-
-    public Profile(Profile otherProfile) {
-        profileName = otherProfile.getProfileName();
-        connectToSsh = otherProfile.shouldConnectToSsh();
-        sshHostName = otherProfile.getSshHostName();
-        sshHostPort = otherProfile.getSshHostPort();
-        sshUsername = otherProfile.getSshUsername();
-        sshPassword = otherProfile.getSshPassword();
-        sshRsaPrivateKeyFilePath = otherProfile.getSshRsaPrivateKeyFilePath();
-        sshRsaPrivateKeyPassword = otherProfile.getSshRsaPrivateKeyPassword();
-        autoEnableProxy = otherProfile.shouldAutoEnableProxy();
-        useSshDynamicTunnel = otherProfile.shouldUseSshDynamicTunnel();
-        proxyHostName = otherProfile.getProxyHostName();
-        proxyPort = otherProfile.getProxyPort();
     }
 
     public String getProfileName() {
@@ -177,5 +177,23 @@ public class Profile implements Serializable {
         result = 31 * result + proxyHostName.hashCode();
         result = 31 * result + proxyPort;
         return result;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Profile newProfile = new Profile(this.profileName);
+        newProfile.setConnectToSsh(connectToSsh);
+        newProfile.setSshHostName(sshHostName);
+        newProfile.setSshHostPort(sshHostPort);
+        newProfile.setSshUsername(sshUsername);
+        newProfile.setSshPassword(sshPassword);
+        newProfile.setSshRsaPrivateKeyFilePath(sshRsaPrivateKeyFilePath);
+        newProfile.setSshRsaPrivateKeyPassword(sshRsaPrivateKeyPassword);
+        newProfile.setAutoEnableProxy(autoEnableProxy);
+        newProfile.setUseSshDynamicTunnel(useSshDynamicTunnel);
+        newProfile.setProxyHostName(proxyHostName);
+        newProfile.setProxyPort(proxyPort);
+
+        return newProfile;
     }
 }
