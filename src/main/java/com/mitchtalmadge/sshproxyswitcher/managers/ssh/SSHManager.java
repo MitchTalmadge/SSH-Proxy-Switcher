@@ -3,6 +3,8 @@ package com.mitchtalmadge.sshproxyswitcher.managers.ssh;
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
+import com.sshtools.events.Event;
+import com.sshtools.events.EventListener;
 import com.sshtools.net.SocketTransport;
 import com.sshtools.publickey.InvalidPassphraseException;
 import com.sshtools.publickey.SshPrivateKeyFile;
@@ -34,6 +36,7 @@ public class SSHManager {
             SshClient sshClient = connectToSsh(connector, profile);
 
             sshMaintainerThread = new SSHMaintainerThread(sshClient, connector, profile);
+            sshMaintainerThread.start();
         } catch (SSHConnectionException e) {
             stopConnection();
             throw e;
@@ -135,7 +138,6 @@ public class SSHManager {
             try {
                 sshMaintainerThread.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
             }
             sshMaintainerThread = null;
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnected.");
@@ -145,11 +147,10 @@ public class SSHManager {
     protected void shutDownDynamicTunnel() {
         if (this.dynamicTunnelMaintainerThread != null) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Closing Dynamic Tunnel...");
-            dynamicTunnelMaintainerThread.interrupt();
+            dynamicTunnelMaintainerThread.shutDown();
             try {
                 dynamicTunnelMaintainerThread.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
             }
             dynamicTunnelMaintainerThread = null;
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Dynamic Tunnel Closed.");
@@ -226,6 +227,7 @@ public class SSHManager {
 
         private SshClient sshClient;
         private int proxyPort;
+        private QuietProxyServer socksServer;
 
         public DynamicTunnelMaintainerThread(SshClient sshClient, int proxyPort) {
             super("DynamicTunnelMaintainerThread");
@@ -235,12 +237,15 @@ public class SSHManager {
 
         @Override
         public void run() {
-            ProxyServer socksServer = new ProxyServer(new ServerAuthenticatorNone(), sshClient);
+            socksServer = new QuietProxyServer(new ServerAuthenticatorNone(), sshClient);
             socksServer.start(proxyPort);
+        }
 
-            System.out.println("DynamicTunnelMaintainerThread closing.");
-
-            socksServer.stop();
+        public void shutDown() {
+            if (socksServer != null) {
+                socksServer.stop();
+            }
+            this.interrupt();
         }
     }
 }
