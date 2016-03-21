@@ -1,148 +1,210 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.ssh;
 
+import com.maverick.events.Event;
+import com.maverick.events.EventListener;
+import com.maverick.events.EventObject;
+import com.maverick.ssh.*;
+import com.maverick.ssh.components.SshKeyPair;
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
-import com.trilead.ssh2.Connection;
-import com.trilead.ssh2.ConnectionMonitor;
-import com.trilead.ssh2.DynamicPortForwarder;
-import com.trilead.ssh2.ServerHostKeyVerifier;
+import com.sshtools.net.SocketTransport;
+import com.sshtools.publickey.InvalidPassphraseException;
+import com.sshtools.publickey.SshPrivateKeyFile;
+import com.sshtools.publickey.SshPrivateKeyFileFactory;
+import socks.ProxyServer;
+import socks.server.ServerAuthenticatorNone;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-public class SSHManager implements ConnectionMonitor {
+public class SSHManager {
 
-    private Connection connection;
-    private Profile connectionProfile;
-    private DynamicPortForwarder dynamicPortForwarder;
+    private SshClient sshClient;
+    private SSHMaintainerThread maintainerThread;
 
     public void startConnection(Profile profile) throws SSHConnectionException {
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connecting to SSH Server for " + profile.getProfileName());
-        if (connection != null)
+        if (sshClient != null && sshClient.isConnected())
             stopConnection();
-
-        connectionProfile = profile;
-
-        String sshHostName = profile.getSshHostName();
-        int sshPort = profile.getSshHostPort() > 0 ? profile.getSshHostPort() : 22;
-        String sshUsername = profile.getSshUsername();
-        String sshPassword = profile.getSshPassword();
-        String rsaKeyPath = profile.getSshRsaPrivateKeyFilePath();
-        String rsaKeyPass = profile.getSshRsaPrivateKeyPassword();
-        int proxyPort = profile.getProxyPort() > 0 ? profile.getProxyPort() : 2000;
-
-        this.connection = new Connection(sshHostName, sshPort);
-        connection.addConnectionMonitor(this);
 
         try {
-            connection.connect(new IgnoreHostKeyVerifier());
-        } catch (IOException e) {
+            SshConnector connector = SshConnector.createInstance();
+            connector.setKnownHosts((s, sshPublicKey) -> true);
+
+            SshClient sshClient = connectToSsh(connector, profile);
+
+            maintainerThread = new SSHMaintainerThread(sshClient, connector, profile);
+        } catch (SSHConnectionException e) {
             stopConnection();
-            SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+            throw e;
+        } catch (SshException e) {
+            stopConnection();
             throw new SSHConnectionException(e.getMessage());
         }
+    }
 
+    protected SshClient connectToSsh(SshConnector connector, Profile connectionProfile) throws SSHConnectionException {
         try {
+            String sshHostName = connectionProfile.getSshHostName();
+            int sshPort = connectionProfile.getSshHostPort() > 0 ? connectionProfile.getSshHostPort() : 22;
+            String sshUsername = connectionProfile.getSshUsername();
+            String sshPassword = connectionProfile.getSshPassword();
+            String rsaKeyPath = connectionProfile.getSshRsaPrivateKeyFilePath();
+            String rsaKeyPass = connectionProfile.getSshRsaPrivateKeyPassword();
+            int proxyPort = connectionProfile.getProxyPort() > 0 ? connectionProfile.getProxyPort() : 2000;
+
+            sshClient = connector.connect(new SocketTransport(sshHostName, sshPort), sshUsername, true);
+
             if (!rsaKeyPath.isEmpty()) {
-                if (!connection.isAuthenticationComplete()) {
+                try {
+                    tryAuthenticateWithRsa(new File(rsaKeyPath), rsaKeyPass, sshClient);
+                } catch (SSHConnectionException e) {
                     try {
-                        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Authenticating with RSA Key...");
-                        connection.authenticateWithPublicKey(sshUsername, new File(rsaKeyPath), rsaKeyPass);
-                    } catch (IOException ignored) {
+                        tryAuthenticateWithPassword(sshUsername, sshPassword, sshClient);
+                    } catch (SSHConnectionException e1) {
+                        throw new SSHConnectionException("Authentication Failed.");
                     }
                 }
-
-                if (!connection.isAuthenticationComplete()) {
-                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "RSA Key Auth Failed. Trying Username and Password...");
-                    connection.authenticateWithPassword(sshUsername, sshPassword);
-                }
-
-                if (!connection.isAuthenticationComplete()) {
-                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "All Auth Methods Failed.");
-                    stopConnection();
-                    throw new SSHConnectionException("All Auth Methods Failed.");
-                }
             } else {
-                if (!connection.isAuthenticationComplete()) {
-                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Authenticating with Username and Password...");
-                    connection.authenticateWithPassword(sshUsername, sshPassword);
-                }
-
-                if (!connection.isAuthenticationComplete()) {
-                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "All Auth Methods Failed.");
-                    stopConnection();
-                    throw new SSHConnectionException("All Auth Methods Failed.");
+                try {
+                    tryAuthenticateWithPassword(sshUsername, sshPassword, sshClient);
+                } catch (SSHConnectionException e1) {
+                    throw new SSHConnectionException("Authentication Failed.");
                 }
             }
-        } catch (IOException e) {
-            stopConnection();
-            SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+
+            if (connectionProfile.shouldUseSshDynamicTunnel()) {
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Opening Dynamic Tunnel on localhost:" + proxyPort);
+                ProxyServer socksServer = new ProxyServer(new ServerAuthenticatorNone(), sshClient);
+                socksServer.start(proxyPort);
+            }
+
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connected to " + sshHostName + ":" + sshPort);
+            return sshClient;
+        } catch (SshException | IOException e) {
             throw new SSHConnectionException(e.getMessage());
         }
+    }
 
-        if (profile.shouldUseSshDynamicTunnel()) {
-            try {
-                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Opening Dynamic Tunnel on localhost:" + proxyPort + ".");
-                this.dynamicPortForwarder = connection.createDynamicPortForwarder(new InetSocketAddress(InetAddress.getLocalHost(), proxyPort));
-            } catch (IOException e) {
-                stopConnection();
-                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
-                throw new SSHConnectionException(e.getMessage());
+    private void tryAuthenticateWithRsa(File rsaKey, String rsaKeyPassword, SshClient sshClient) throws SSHConnectionException {
+        try {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Authenticating with RSA Key...");
+            PublicKeyAuthentication publicKeyAuthentication = new PublicKeyAuthentication();
+
+            FileInputStream rsaKeyInputStream = new FileInputStream(rsaKey);
+            SshPrivateKeyFile privateKeyFile = SshPrivateKeyFileFactory.parse(rsaKeyInputStream);
+            rsaKeyInputStream.close();
+
+            SshKeyPair keyPair = privateKeyFile.toKeyPair(privateKeyFile.isPassphraseProtected() ? rsaKeyPassword : null);
+
+            publicKeyAuthentication.setPrivateKey(keyPair.getPrivateKey());
+            publicKeyAuthentication.setPublicKey(keyPair.getPublicKey());
+
+            if (sshClient.authenticate(publicKeyAuthentication) != SshAuthentication.COMPLETE) {
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "RSA Key Auth Failed.");
+                throw new SSHConnectionException("RSA Key Auth Failed.");
             }
+        } catch (InvalidPassphraseException | IOException | SshException e) {
+            throw new SSHConnectionException(e.getMessage());
         }
+    }
 
-        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connected!");
+    private void tryAuthenticateWithPassword(String username, String password, SshClient sshClient) throws SSHConnectionException {
+        try {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Authenticating with Username and Password...");
+            PasswordAuthentication passwordAuthentication = new PasswordAuthentication();
+            passwordAuthentication.setUsername(username);
+            passwordAuthentication.setPassword(password);
+
+            if (sshClient.authenticate(passwordAuthentication) != SshAuthentication.COMPLETE) {
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Password Auth Failed.");
+                throw new SSHConnectionException("Password Auth Failed.");
+            }
+        } catch (SshException e) {
+            throw new SSHConnectionException(e.getMessage());
+        }
     }
 
     public void stopConnection() {
-        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnecting from SSH...");
-        if (this.connection != null) {
-            if (this.dynamicPortForwarder != null) {
-                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Closing Dynamic Tunnel...");
-                try {
-                    this.dynamicPortForwarder.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        if (this.maintainerThread != null) {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnecting from SSH...");
+            maintainerThread.stopRunning();
+            try {
+                maintainerThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Closing SSH Connection...");
-            connection.close();
-            connection = null;
-            connectionProfile = null;
+            maintainerThread = null;
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnected!");
         }
     }
 
     public boolean isConnected() {
-        return this.connection != null && this.connection.isConnected();
+        return this.maintainerThread != null && maintainerThread.isConnected();
     }
 
-    @Override
-    public void connectionLost(Throwable reason) {
-        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "SSH Connection Lost! Reason: " + reason.getMessage());
-        if (!reason.getMessage().equals("Closed due to user request.") && !reason.getMessage().equals("There was a problem during connect.")) {
-            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Reconnecting...");
-            try {
-                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTING);
-                startConnection(connectionProfile);
-                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
-            } catch (Exception e) {
-                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Could not Reconnect!");
-                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
-                e.printStackTrace();
-            }
+    private class SSHMaintainerThread extends Thread {
+
+        private final AtomicBoolean running = new AtomicBoolean(true);
+        private SshClient sshClient;
+        private SshConnector connector;
+        private Profile connectionProfile;
+
+        public SSHMaintainerThread(SshClient sshClient, SshConnector connector, Profile connectionProfile) {
+            super("SSHMaintainerThread");
+            this.sshClient = sshClient;
+            this.connector = connector;
+            this.connectionProfile = connectionProfile;
         }
-    }
 
-    private class IgnoreHostKeyVerifier implements ServerHostKeyVerifier {
+        public void stopRunning() {
+            this.running.set(false);
+        }
 
         @Override
-        public boolean verifyServerHostKey(String hostname, int port, String serverHostKeyAlgorithm, byte[] serverHostKey) throws Exception {
-            return true;
+        public void run() {
+            while (running.get()) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    break;
+                }
+                try {
+                    reconnectToSession();
+                } catch (Exception e) {
+                    SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+                    e.printStackTrace();
+                    break;
+                }
+            }
+            disconnectFromSshClient();
+        }
+
+        private void reconnectToSession() throws InterruptedException {
+            if (!sshClient.isConnected()) {
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "SSH Connection Lost! Reconnecting...");
+                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTING);
+                try {
+                    sshClient = connectToSsh(connector, connectionProfile);
+                    SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
+                } catch (SSHConnectionException e) {
+                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Error While Reconnecting: " + e.getMessage());
+                    SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+                }
+            }
+        }
+
+        private void disconnectFromSshClient() {
+            if (sshClient.isConnected())
+                sshClient.disconnect();
+        }
+
+        public boolean isConnected() {
+            return sshClient != null && sshClient.isConnected();
         }
     }
 }
