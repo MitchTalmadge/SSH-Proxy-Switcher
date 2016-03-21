@@ -1,23 +1,23 @@
 package com.mitchtalmadge.sshproxyswitcher.utilities;
 
-import org.jasypt.util.text.StrongTextEncryptor;
+import org.jasypt.util.text.BasicTextEncryptor;
 
 public class EncryptionHelper {
 
     public static String encryptText(String text, String password)
     {
-        StrongTextEncryptor strongTextEncryptor = new StrongTextEncryptor();
-        strongTextEncryptor.setPassword(password);
+        BasicTextEncryptor basicTextEncryptor = new BasicTextEncryptor();
+        basicTextEncryptor.setPassword(password);
 
-        return strongTextEncryptor.encrypt(text);
+        return basicTextEncryptor.encrypt(text);
     }
 
     public static String decryptText(String encryptedText, String password)
     {
-        StrongTextEncryptor strongTextEncryptor = new StrongTextEncryptor();
-        strongTextEncryptor.setPassword(password);
+        BasicTextEncryptor basicTextEncryptor = new BasicTextEncryptor();
+        basicTextEncryptor.setPassword(password);
 
-        return strongTextEncryptor.decrypt(encryptedText);
+        return basicTextEncryptor.decrypt(encryptedText);
     }
 
 }

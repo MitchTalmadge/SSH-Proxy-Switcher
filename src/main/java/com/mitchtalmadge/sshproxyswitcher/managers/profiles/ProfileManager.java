@@ -5,7 +5,6 @@ import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxySettingsException;
 import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHConnectionException;
-import com.mitchtalmadge.sshproxyswitcher.utilities.FileUtilities;
 import javafx.application.Platform;
 
 import java.io.*;
@@ -31,11 +30,13 @@ public class ProfileManager {
                 objectOutputStream.writeInt(profilesCount);
 
                 for (Profile profile : loadedProfiles) {
+                    if (!profile.isEncrypted())
+                        profile = ProfileEncryptionAdapter.encryptProfile(profile);
                     objectOutputStream.writeObject(profile);
                 }
                 objectOutputStream.close();
                 fileOutputStream.close();
-            } catch (IOException e) {
+            } catch (IOException | ProfileCryptException e) {
                 e.printStackTrace();
             }
 
@@ -60,6 +61,10 @@ public class ProfileManager {
 
             for (int i = 0; i < profilesCount; i++) {
                 Profile loadedProfile = (Profile) objectInputStream.readObject();
+
+                if (loadedProfile.isEncrypted())
+                    loadedProfile = ProfileEncryptionAdapter.decryptProfile(loadedProfile);
+
                 loadedProfiles.add(loadedProfile);
             }
         } catch (InvalidClassException e) {
@@ -78,7 +83,9 @@ public class ProfileManager {
                 Platform.exit();
             } else
                 loadProfiles();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (EOFException e) {
+            return;
+        } catch (IOException | ClassNotFoundException | ProfileCryptException e) {
             e.printStackTrace();
         }
 

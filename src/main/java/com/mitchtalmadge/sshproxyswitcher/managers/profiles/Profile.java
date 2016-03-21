@@ -10,8 +10,6 @@ public class Profile implements Serializable {
     private static final long serialVersionUID = 100L;
 
     protected boolean encrypted = false;
-
-    private String profileName = "";
     @Encryptable
     protected boolean connectToSsh;
     @Encryptable
@@ -34,6 +32,7 @@ public class Profile implements Serializable {
     protected String proxyHostName = "";
     @Encryptable
     protected int proxyPort;
+    private String profileName = "";
 
     public Profile(String name) {
         profileName = name;
@@ -135,6 +134,10 @@ public class Profile implements Serializable {
         this.proxyPort = proxyPort;
     }
 
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
     @Override
     public String toString() {
         return profileName;
@@ -180,8 +183,17 @@ public class Profile implements Serializable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-        Profile newProfile = new Profile(this.profileName);
+    public Profile clone() {
+
+        Profile newProfile;
+
+        try {
+            newProfile = (Profile) super.clone();
+        } catch (CloneNotSupportedException e) {
+            newProfile = new Profile(profileName);
+        }
+
+        newProfile.setProfileName(profileName);
         newProfile.setConnectToSsh(connectToSsh);
         newProfile.setSshHostName(sshHostName);
         newProfile.setSshHostPort(sshHostPort);

@@ -26,32 +26,32 @@ public class ExampleProfileFactory {
         VALID_PROFILE.setUseSshDynamicTunnel(true);
         VALID_PROFILE.setProxyPort(50001);
 
-        INVALID_AUTH_PROFILE = new Profile(VALID_PROFILE);
+        INVALID_AUTH_PROFILE = VALID_PROFILE.clone();
         INVALID_AUTH_PROFILE.setProfileName("Invalid Profile");
         INVALID_AUTH_PROFILE.setSshPassword(INCORRECT_PASSWORD);
 
-        INVALID_HOST_PROFILE = new Profile(VALID_PROFILE);
+        INVALID_HOST_PROFILE = VALID_PROFILE.clone();
         INVALID_HOST_PROFILE.setProfileName("Invalid Host Profile");
         INVALID_HOST_PROFILE.setSshHostName(INCORRECT_HOST);
 
-        INVALID_PROXY_PROFILE = new Profile(VALID_PROFILE);
+        INVALID_PROXY_PROFILE = VALID_PROFILE.clone();
         INVALID_PROXY_PROFILE.setProfileName("Invalid Proxy Profile");
         INVALID_PROXY_PROFILE.setProxyPort(-1);
     }
 
     public static Profile getValidProfile() {
-        return new Profile(VALID_PROFILE);
+        return VALID_PROFILE.clone();
     }
 
     public static Profile getInvalidAuthProfile() {
-        return new Profile(INVALID_AUTH_PROFILE);
+        return INVALID_AUTH_PROFILE.clone();
     }
 
     public static Profile getInvalidHostProfile() {
-        return new Profile(INVALID_HOST_PROFILE);
+        return INVALID_HOST_PROFILE.clone();
     }
 
     public static Profile getInvalidProxyProfile() {
-        return new Profile(INVALID_PROXY_PROFILE);
+        return INVALID_PROXY_PROFILE.clone();
     }
 }

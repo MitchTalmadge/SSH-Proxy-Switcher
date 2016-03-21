@@ -16,7 +16,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -177,7 +180,6 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         this.profileNameField.setText(profile.getProfileName());
 
         this.connectToSSHCheck.setSelected(profile.shouldConnectToSsh());
-        updateSshConfigurationDisable();
         this.sshHostNameField.setText(profile.getSshHostName());
         this.sshPortField.setText(profile.getSshHostPort() > 0 ? profile.getSshHostPort() + "" : "");
         this.sshUsernameField.setText(profile.getSshUsername());
@@ -188,20 +190,19 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         this.proxyAutosetCheck.setSelected(profile.shouldAutoEnableProxy());
         this.proxyTunnelCheck.setSelected(profile.shouldUseSshDynamicTunnel());
 
-        updateProxyConfigurationDisable();
         this.proxyHostNameField.setText(profile.getProxyHostName());
         this.proxyPortField.setText(profile.getProxyPort() > 0 ? profile.getProxyPort() + "" : "");
+
+        updateConfigurationDisabledComponents();
 
         configurationPane.setVisible(true);
     }
 
-    private void updateSshConfigurationDisable() {
+    private void updateConfigurationDisabledComponents() {
         this.sshServerConfiguration.setDisable(!connectToSSHCheck.isSelected());
-    }
-
-    private void updateProxyConfigurationDisable() {
-        this.proxyConfiguration.setDisable(!(proxyAutosetCheck.isSelected() || proxyTunnelCheck.isSelected()));
-        this.proxyHostNameField.setDisable(proxyTunnelCheck.isSelected());
+        this.proxyTunnelCheck.setDisable(!connectToSSHCheck.isSelected());
+        this.proxyConfiguration.setDisable(!(proxyAutosetCheck.isSelected() || (proxyTunnelCheck.isSelected() && !proxyTunnelCheck.isDisable())));
+        this.proxyHostNameField.setDisable((proxyTunnelCheck.isSelected() && !proxyTunnelCheck.isDisable()));
     }
 
     /**
@@ -235,7 +236,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onConnectToSSHCheckFired(ActionEvent event) {
-        updateSshConfigurationDisable();
+        updateConfigurationDisabledComponents();
     }
 
     /**
@@ -247,8 +248,23 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         File chosenFile = fileChooser.showOpenDialog(sshRsaKeyPathField.getScene().getWindow());
         if (chosenFile == null)
             sshRsaKeyPathField.setText("");
-        else
-            sshRsaKeyPathField.setText(chosenFile.getAbsolutePath());
+        else {
+            try {
+                FileReader fileReader = new FileReader(chosenFile);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                if (bufferedReader.readLine().startsWith("PuTTY")) {
+                    GUIHelper.showErrorDialog("Unsupported RSA Key", "Unsupported RSA Key", "PuTTY RSA keys are not supported. Please use PuTTYGen to convert the key to an OpenSSH format.");
+                    sshRsaKeyPathField.setText("");
+                } else
+                    sshRsaKeyPathField.setText(chosenFile.getAbsolutePath());
+
+                bufferedReader.close();
+                fileReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -256,7 +272,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onProxyTunnelCheckFired(ActionEvent event) {
-        updateProxyConfigurationDisable();
+        updateConfigurationDisabledComponents();
     }
 
     /**
@@ -264,7 +280,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onProxyAutosetCheckFired(ActionEvent event) {
-        updateProxyConfigurationDisable();
+        updateConfigurationDisabledComponents();
     }
 
     /**
