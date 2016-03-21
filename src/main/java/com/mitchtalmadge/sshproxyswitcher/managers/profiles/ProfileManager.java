@@ -5,10 +5,12 @@ import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxySettingsException;
 import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHConnectionException;
 import com.mitchtalmadge.sshproxyswitcher.utilities.FileUtilities;
+import javafx.application.Platform;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Level;
 
 public class ProfileManager {
 
@@ -44,15 +46,37 @@ public class ProfileManager {
     public void loadProfiles() {
         loadedProfiles = new ArrayList<>();
 
+        if (!profilesFile.exists() || profilesFile.length() == 0)
+            return;
+
+        FileInputStream fileInputStream = null;
+        ObjectInputStream objectInputStream = null;
+
         try {
-            FileInputStream fileInputStream = new FileInputStream(profilesFile);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            fileInputStream = new FileInputStream(profilesFile);
+            objectInputStream = new ObjectInputStream(fileInputStream);
             int profilesCount = objectInputStream.readInt();
 
             for (int i = 0; i < profilesCount; i++) {
                 Profile loadedProfile = (Profile) objectInputStream.readObject();
                 loadedProfiles.add(loadedProfile);
             }
+        } catch (InvalidClassException e) {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.SEVERE, "Profiles saved are not compatible with the Profile object. Deleting saved profiles.");
+            try {
+                fileInputStream.close();
+                if (objectInputStream != null)
+                    objectInputStream.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+                Platform.exit();
+            }
+            boolean deleted = profilesFile.delete();
+            if (!deleted) {
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.SEVERE, "Unable to delete profiles save file. Shutting down.");
+                Platform.exit();
+            } else
+                loadProfiles();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

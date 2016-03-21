@@ -6,10 +6,8 @@ import org.apache.sshd.server.Command;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.UserAuth;
 import org.apache.sshd.server.auth.UserAuthPasswordFactory;
-import org.apache.sshd.server.auth.password.PasswordAuthenticator;
 import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
-import org.apache.sshd.server.session.ServerSession;
 import org.apache.sshd.server.subsystem.sftp.SftpSubsystemFactory;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
@@ -53,12 +51,7 @@ public class SSHManagerTest {
         userAuthFactories.add(new UserAuthPasswordFactory());
         sshd.setUserAuthFactories(userAuthFactories);
 
-        sshd.setPasswordAuthenticator(new PasswordAuthenticator() {
-            @Override
-            public boolean authenticate(String username, String password, ServerSession serverSession) {
-                return username.equals(ExampleProfileFactory.USERNAME) && password.equals(ExampleProfileFactory.CORRECT_PASSWORD);
-            }
-        });
+        sshd.setPasswordAuthenticator((username, password, serverSession) -> username.equals(ExampleProfileFactory.USERNAME) && password.equals(ExampleProfileFactory.CORRECT_PASSWORD));
 
         sshd.setCommandFactory(new ScpCommandFactory());
 

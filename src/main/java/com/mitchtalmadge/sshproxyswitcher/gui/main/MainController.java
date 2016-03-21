@@ -223,6 +223,8 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
 
         Profile profile = new Profile(profileName);
         SSHProxySwitcher.getInstance().getProfileManager().addProfile(profile);
+
+        profileListView.getSelectionModel().selectLast();
     }
 
     /**
@@ -278,6 +280,13 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     void onSaveButtonFired(ActionEvent event) {
+        for (Profile profile : SSHProxySwitcher.getInstance().getProfileManager().getLoadedProfiles()) {
+            if (profile.getProfileName().equalsIgnoreCase(this.profileNameField.getText()) && !profile.equals(profileListView.getSelectionModel().getSelectedItem())) {
+                GUIHelper.showErrorDialog("Cannot Save", "Profile Name is Taken", "The profile name you have entered is already taken. Please choose a unique name. Changes have not been saved.");
+                return;
+            }
+        }
+
         Profile profile = this.profileListView.getSelectionModel().getSelectedItem();
         profile.setProfileName(this.profileNameField.getText());
 
@@ -297,6 +306,8 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         profile.setProxyPort(this.proxyPortField.getText().isEmpty() ? 0 : Integer.parseInt(this.proxyPortField.getText()));
 
         SSHProxySwitcher.getInstance().getProfileManager().saveProfiles();
+
+        profileListView.getSelectionModel().select(profile);
     }
 
     @Override

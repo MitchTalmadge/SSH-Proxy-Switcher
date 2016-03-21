@@ -2,18 +2,22 @@ package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
 import java.io.Serializable;
 
+
 public class Profile implements Serializable {
-    private String profileName;
+
+    public static final long serialVersionUID = 100L;
+
+    private String profileName = "";
     private boolean connectToSsh;
-    private String sshHostName;
+    private String sshHostName = "";
     private int sshHostPort;
-    private String sshUsername;
-    private String sshPassword;
-    private String sshRsaPrivateKeyFilePath;
-    private String sshRsaPrivateKeyPassword;
+    private String sshUsername = "";
+    private String sshPassword = "";
+    private String sshRsaPrivateKeyFilePath = "";
+    private String sshRsaPrivateKeyPassword = "";
     private boolean autoEnableProxy;
     private boolean useSshDynamicTunnel;
-    private String proxyHostName;
+    private String proxyHostName = "";
     private int proxyPort;
 
     public Profile(String name) {
@@ -134,5 +138,44 @@ public class Profile implements Serializable {
     @Override
     public String toString() {
         return profileName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Profile profile = (Profile) o;
+
+        if (connectToSsh != profile.connectToSsh) return false;
+        if (sshHostPort != profile.sshHostPort) return false;
+        if (autoEnableProxy != profile.autoEnableProxy) return false;
+        if (useSshDynamicTunnel != profile.useSshDynamicTunnel) return false;
+        if (proxyPort != profile.proxyPort) return false;
+        if (!profileName.equals(profile.profileName)) return false;
+        if (!sshHostName.equals(profile.sshHostName)) return false;
+        if (!sshUsername.equals(profile.sshUsername)) return false;
+        if (!sshPassword.equals(profile.sshPassword)) return false;
+        if (!sshRsaPrivateKeyFilePath.equals(profile.sshRsaPrivateKeyFilePath)) return false;
+        if (!sshRsaPrivateKeyPassword.equals(profile.sshRsaPrivateKeyPassword)) return false;
+        return proxyHostName.equals(profile.proxyHostName);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = profileName.hashCode();
+        result = 31 * result + (connectToSsh ? 1 : 0);
+        result = 31 * result + sshHostName.hashCode();
+        result = 31 * result + sshHostPort;
+        result = 31 * result + sshUsername.hashCode();
+        result = 31 * result + sshPassword.hashCode();
+        result = 31 * result + sshRsaPrivateKeyFilePath.hashCode();
+        result = 31 * result + sshRsaPrivateKeyPassword.hashCode();
+        result = 31 * result + (autoEnableProxy ? 1 : 0);
+        result = 31 * result + (useSshDynamicTunnel ? 1 : 0);
+        result = 31 * result + proxyHostName.hashCode();
+        result = 31 * result + proxyPort;
+        return result;
     }
 }

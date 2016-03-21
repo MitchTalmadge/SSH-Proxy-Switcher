@@ -36,7 +36,7 @@ public class ProxyManager {
     private void setProxy(String proxyHostName, int proxyPort) {
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Enabling Proxy...");
         if (proxyHostName == null || proxyHostName.isEmpty())
-            proxyHostName = "127.0.0.1";
+            proxyHostName = "localhost";
         if (proxyPort == 0)
             proxyPort = 2000;
         Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, "socks=" + proxyHostName + ":" + proxyPort);

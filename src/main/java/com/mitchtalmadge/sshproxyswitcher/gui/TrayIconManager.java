@@ -79,7 +79,7 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
             popupMenu.addSeparator();
 
             for (Profile profile : profiles) {
-                String itemValue = "";
+                String itemValue;
                 if (connectedProfile != null && connectedProfile.getProfileName().equals(profile.getProfileName()))
                     itemValue = "✓ " + profile.getProfileName();
                 else
@@ -127,15 +127,19 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
             default:
             case STATUS_DEFAULT:
                 trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.DEFAULT));
+                trayIcon.setToolTip(Versioning.PROGRAM_NAME + " - Disconnected");
                 break;
             case STATUS_CONNECTING:
                 trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.YELLOW));
+                trayIcon.setToolTip(Versioning.PROGRAM_NAME + " - Connecting");
                 break;
             case STATUS_CONNECTED:
                 trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.GREEN));
+                trayIcon.setToolTip(Versioning.PROGRAM_NAME + " - Connected!");
                 break;
             case STATUS_ERROR:
                 trayIcon.setImage(Versioning.getTrayIconImage(TrayIconImage.RED));
+                trayIcon.setToolTip(Versioning.PROGRAM_NAME + " - Connection Error");
                 break;
         }
     }
