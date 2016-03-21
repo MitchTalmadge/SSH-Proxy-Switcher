@@ -6,6 +6,7 @@ import javafx.scene.image.Image;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
 public class Versioning {
@@ -15,6 +16,7 @@ public class Versioning {
     public static final String PROGRAM_NAME_WITH_VERSION = PROGRAM_NAME + " V" + VERSION_STRING;
     public static final String PROGRAM_NAME_NO_SPACES = "SSH-Proxy-Switcher";
     public static final int APTIAPI_PROJECT_ID = 2;
+    private static final File APPLICATION_DIR = new File(System.getenv("AppData"), "SSHProxySwitcher");
     private static String logoImageLocation = "/images/Logo-32px.png";
     private static BufferedImage logoImage = null;
 
@@ -30,6 +32,9 @@ public class Versioning {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (!APPLICATION_DIR.exists())
+            APPLICATION_DIR.mkdir();
     }
 
     public static ImageIcon getLogoAsImageIcon() {
@@ -53,5 +58,9 @@ public class Versioning {
 
     public static Image getLogoAsJavaFXImage() {
         return new Image(Versioning.class.getResourceAsStream(logoImageLocation));
+    }
+
+    public static File getApplicationDir() {
+        return APPLICATION_DIR;
     }
 }

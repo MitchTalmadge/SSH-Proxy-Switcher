@@ -1,6 +1,7 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
+import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxySettingsException;
 import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHConnectionException;
@@ -14,7 +15,7 @@ import java.util.logging.Level;
 
 public class ProfileManager {
 
-    protected static final File profilesFile = new File(FileUtilities.getRootDirectory() + "/profiles.ser");
+    protected static final File profilesFile = new File(Versioning.getApplicationDir() + "/profiles.ser");
     protected ArrayList<Profile> loadedProfiles;
     protected Profile connectedProfile;
 
@@ -101,6 +102,9 @@ public class ProfileManager {
     public void deleteProfile(Profile profileToDelete) {
         if (loadedProfiles == null)
             loadProfiles();
+
+        if (connectedProfile.equals(profileToDelete))
+            disconnectProfiles();
 
         Iterator<Profile> profileIterator = loadedProfiles.iterator();
         while (profileIterator.hasNext()) {

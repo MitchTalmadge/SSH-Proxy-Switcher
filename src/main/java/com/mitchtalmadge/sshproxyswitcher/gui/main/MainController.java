@@ -166,7 +166,10 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         if (profilesList != null) {
             profileListView.getItems().clear();
             profileListView.getItems().addAll(profilesList);
-            profileListView.getSelectionModel().select(0);
+            if (profilesList.size() == 0)
+                configurationPane.setVisible(false);
+            else
+                profileListView.getSelectionModel().select(0);
         }
     }
 

@@ -75,7 +75,7 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
         disconnectItem.setEnabled(connectedProfile != null);
         popupMenu.add(disconnectItem);
 
-        if (profiles != null) {
+        if (profiles != null && profiles.size() > 0) {
             popupMenu.addSeparator();
 
             for (Profile profile : profiles) {

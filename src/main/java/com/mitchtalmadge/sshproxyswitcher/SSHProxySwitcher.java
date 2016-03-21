@@ -25,9 +25,8 @@ import java.util.prefs.Preferences;
 
 public class SSHProxySwitcher extends Application {
 
-    private static final File LOG_DIR = new File(FileUtilities.getRootDirectory(), "logs");
-    private static final File XML_FILE = new File(FileUtilities.getRootDirectory(), "profiles.xml");
-    private static final File PROPERTIES_FILE = new File(FileUtilities.getRootDirectory(), "SSHProxySwitcher.config");
+    private static final File LOG_DIR = new File(Versioning.getApplicationDir(), "logs");
+    private static final File PROPERTIES_FILE = new File(Versioning.getApplicationDir(), "SSHProxySwitcher.config");
     private static SSHProxySwitcher instance;
     private LoggingManager loggingManager;
     private PropertiesManager propertiesManager;

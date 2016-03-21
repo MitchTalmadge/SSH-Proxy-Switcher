@@ -34,13 +34,12 @@ public class ProxyManager {
     }
 
     private void setProxy(String proxyHostName, int proxyPort) {
-        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Enabling Proxy...");
         if (proxyHostName == null || proxyHostName.isEmpty())
             proxyHostName = "localhost";
         if (proxyPort == 0)
             proxyPort = 2000;
         Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, "socks=" + proxyHostName + ":" + proxyPort);
-        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Enabled!");
+        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Settings Updated.");
     }
 
     public void disableProxySettings() {
@@ -48,6 +47,7 @@ public class ProxyManager {
     }
 
     private void setProxyEnabled(boolean enabled) {
+        SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy " + (enabled ? "Enabled." : "Disabled."));
         Advapi32Util.registrySetIntValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_ENABLED_KEY, enabled ? 1 : 0);
     }
 }
