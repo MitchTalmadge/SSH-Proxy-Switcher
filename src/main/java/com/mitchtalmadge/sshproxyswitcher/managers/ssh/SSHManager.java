@@ -1,10 +1,5 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.ssh;
 
-import com.maverick.events.Event;
-import com.maverick.events.EventListener;
-import com.maverick.events.EventObject;
-import com.maverick.ssh.*;
-import com.maverick.ssh.components.SshKeyPair;
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
@@ -12,6 +7,10 @@ import com.sshtools.net.SocketTransport;
 import com.sshtools.publickey.InvalidPassphraseException;
 import com.sshtools.publickey.SshPrivateKeyFile;
 import com.sshtools.publickey.SshPrivateKeyFileFactory;
+import com.sshtools.ssh.*;
+import com.sshtools.ssh.components.SshKeyPair;
+import com.sshtools.ssh.components.SshPrivateKey;
+import com.sshtools.ssh.components.SshRsaPrivateKey;
 import socks.ProxyServer;
 import socks.server.ServerAuthenticatorNone;
 
@@ -23,25 +22,24 @@ import java.util.logging.Level;
 
 public class SSHManager {
 
-    private SshClient sshClient;
-    private SSHMaintainerThread maintainerThread;
+    private SSHMaintainerThread sshMaintainerThread;
+    private DynamicTunnelMaintainerThread dynamicTunnelMaintainerThread;
 
     public void startConnection(Profile profile) throws SSHConnectionException {
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connecting to SSH Server for " + profile.getProfileName());
-        if (sshClient != null && sshClient.isConnected())
-            stopConnection();
+        stopConnection();
 
         try {
             SshConnector connector = SshConnector.createInstance();
-            connector.setKnownHosts((s, sshPublicKey) -> true);
+            connector.getContext().setHostKeyVerification((s, sshPublicKey) -> true);
 
             SshClient sshClient = connectToSsh(connector, profile);
 
-            maintainerThread = new SSHMaintainerThread(sshClient, connector, profile);
+            sshMaintainerThread = new SSHMaintainerThread(sshClient, connector, profile);
         } catch (SSHConnectionException e) {
             stopConnection();
             throw e;
-        } catch (SshException e) {
+        } catch (Exception e) {
             stopConnection();
             throw new SSHConnectionException(e.getMessage());
         }
@@ -57,7 +55,7 @@ public class SSHManager {
             String rsaKeyPass = connectionProfile.getSshRsaPrivateKeyPassword();
             int proxyPort = connectionProfile.getProxyPort() > 0 ? connectionProfile.getProxyPort() : 2000;
 
-            sshClient = connector.connect(new SocketTransport(sshHostName, sshPort), sshUsername, true);
+            SshClient sshClient = connector.connect(new SocketTransport(sshHostName, sshPort), sshUsername, true);
 
             if (!rsaKeyPath.isEmpty()) {
                 try {
@@ -79,8 +77,8 @@ public class SSHManager {
 
             if (connectionProfile.shouldUseSshDynamicTunnel()) {
                 SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Opening Dynamic Tunnel on localhost:" + proxyPort);
-                ProxyServer socksServer = new ProxyServer(new ServerAuthenticatorNone(), sshClient);
-                socksServer.start(proxyPort);
+                dynamicTunnelMaintainerThread = new DynamicTunnelMaintainerThread(sshClient, proxyPort);
+                dynamicTunnelMaintainerThread.start();
             }
 
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connected to " + sshHostName + ":" + sshPort);
@@ -99,7 +97,7 @@ public class SSHManager {
             SshPrivateKeyFile privateKeyFile = SshPrivateKeyFileFactory.parse(rsaKeyInputStream);
             rsaKeyInputStream.close();
 
-            SshKeyPair keyPair = privateKeyFile.toKeyPair(privateKeyFile.isPassphraseProtected() ? rsaKeyPassword : null);
+            SshKeyPair keyPair = privateKeyFile.toKeyPair(rsaKeyPassword);
 
             publicKeyAuthentication.setPrivateKey(keyPair.getPrivateKey());
             publicKeyAuthentication.setPublicKey(keyPair.getPublicKey());
@@ -109,6 +107,8 @@ public class SSHManager {
                 throw new SSHConnectionException("RSA Key Auth Failed.");
             }
         } catch (InvalidPassphraseException | IOException | SshException e) {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "RSA Key Auth Failed: ");
+            e.printStackTrace();
             throw new SSHConnectionException(e.getMessage());
         }
     }
@@ -130,21 +130,36 @@ public class SSHManager {
     }
 
     public void stopConnection() {
-        if (this.maintainerThread != null) {
+        shutDownDynamicTunnel();
+        if (this.sshMaintainerThread != null) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnecting from SSH...");
-            maintainerThread.stopRunning();
+            sshMaintainerThread.stopRunning();
             try {
-                maintainerThread.join();
+                sshMaintainerThread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            maintainerThread = null;
-            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnected!");
+            sshMaintainerThread = null;
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnected.");
+        }
+    }
+
+    protected void shutDownDynamicTunnel() {
+        if (this.dynamicTunnelMaintainerThread != null) {
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Closing Dynamic Tunnel...");
+            dynamicTunnelMaintainerThread.shutDown();
+            try {
+                dynamicTunnelMaintainerThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            dynamicTunnelMaintainerThread = null;
+            SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Dynamic Tunnel Closed.");
         }
     }
 
     public boolean isConnected() {
-        return this.maintainerThread != null && maintainerThread.isConnected();
+        return this.sshMaintainerThread != null && sshMaintainerThread.isConnected();
     }
 
     private class SSHMaintainerThread extends Thread {
@@ -189,6 +204,7 @@ public class SSHManager {
                 SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "SSH Connection Lost! Reconnecting...");
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTING);
                 try {
+                    shutDownDynamicTunnel();
                     sshClient = connectToSsh(connector, connectionProfile);
                     SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
                 } catch (SSHConnectionException e) {
@@ -205,6 +221,37 @@ public class SSHManager {
 
         public boolean isConnected() {
             return sshClient != null && sshClient.isConnected();
+        }
+    }
+
+    private class DynamicTunnelMaintainerThread extends Thread {
+
+        private SshClient sshClient;
+        private int proxyPort;
+
+        private AtomicBoolean running = new AtomicBoolean(true);
+
+        public DynamicTunnelMaintainerThread(SshClient sshClient, int proxyPort) {
+            super("DynamicTunnelMaintainerThread");
+            this.sshClient = sshClient;
+            this.proxyPort = proxyPort;
+        }
+
+        @Override
+        public void run() {
+            ProxyServer socksServer = new ProxyServer(new ServerAuthenticatorNone(), sshClient);
+            socksServer.start(proxyPort);
+
+            while (true) {
+                if (!running.get())
+                    break;
+            }
+
+            socksServer.stop();
+        }
+
+        public void shutDown() {
+            this.running.set(false);
         }
     }
 }

@@ -29,30 +29,13 @@
         </dependency>
         <dependency>
             <groupId>com.sshtools</groupId>
-            <artifactId>maverick</artifactId>
-            <version>1.6.15</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sshtools</groupId>
-            <artifactId>maverick-dynamic-forward</artifactId>
-            <version>1.6.15</version>
+            <artifactId>j2ssh-maverick</artifactId>
+            <version>1.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.sshd</groupId>
             <artifactId>sshd-core</artifactId>
             <version>1.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -72,13 +55,5 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>sshtools</id>
-            <name>sshtools-releases</name>
-            <url>http://artifactory.javassh.com/public-releases</url>
-        </repository>
-    </repositories>
 
 </project>
