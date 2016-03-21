@@ -24,7 +24,7 @@ public class ProxyManager {
                 throw new ProxySettingsException("Port is out of bounds: " + profile.getProxyPort());
             } else {
                 setProxyEnabled(true);
-                setProxy(profile.getProxyHostName(), profile.getProxyPort());
+                setProxy(profile.getProxyHostName(), profile.getProxyPort(), profile.shouldUseSshDynamicTunnel());
             }
         } else {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Tried to set Proxy Settings, but profile was null.");
@@ -33,12 +33,12 @@ public class ProxyManager {
         }
     }
 
-    private void setProxy(String proxyHostName, int proxyPort) {
+    private void setProxy(String proxyHostName, int proxyPort, boolean socks) {
         if (proxyHostName == null || proxyHostName.isEmpty())
             proxyHostName = "localhost";
         if (proxyPort == 0)
             proxyPort = 2000;
-        Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, "socks=" + proxyHostName + ":" + proxyPort);
+        Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, (socks ? "socks=" : "") + proxyHostName + ":" + proxyPort);
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Settings Updated.");
     }
 

@@ -110,7 +110,7 @@ public class ProfileManager {
         if (loadedProfiles == null)
             loadProfiles();
 
-        if (connectedProfile.equals(profileToDelete))
+        if (connectedProfile != null && connectedProfile.equals(profileToDelete))
             disconnectProfiles();
 
         Iterator<Profile> profileIterator = loadedProfiles.iterator();
@@ -134,6 +134,10 @@ public class ProfileManager {
                     SSHProxySwitcher.getInstance().getProxyManager().setProxySettings(profile);
                 connectedProfile = profile;
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
+                if (profile.shouldConnectToSsh())
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Connected!", "Connection to " + profile.getProfileName() + " has been established.");
+                else if (profile.shouldAutoEnableProxy())
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
             } catch (SSHConnectionException | ProxySettingsException e) {
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
                 e.printStackTrace();

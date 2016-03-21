@@ -144,6 +144,14 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
         }
     }
 
+    public void displayMessage(String caption, String message) {
+        this.trayIcon.displayMessage(caption, message, TrayIcon.MessageType.INFO);
+    }
+
+    public void displayError(String caption, String message) {
+        this.trayIcon.displayMessage(caption, message, TrayIcon.MessageType.ERROR);
+    }
+
     @Override
     public void loadedProfilesUpdated(ArrayList<Profile> loadedProfiles) {
         refreshPopupMenu();

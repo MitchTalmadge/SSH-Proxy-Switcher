@@ -3,20 +3,18 @@ package com.mitchtalmadge.sshproxyswitcher.managers.ssh;
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
-import com.sshtools.events.Event;
-import com.sshtools.events.EventListener;
 import com.sshtools.net.SocketTransport;
 import com.sshtools.publickey.InvalidPassphraseException;
 import com.sshtools.publickey.SshPrivateKeyFile;
 import com.sshtools.publickey.SshPrivateKeyFileFactory;
 import com.sshtools.ssh.*;
 import com.sshtools.ssh.components.SshKeyPair;
-import socks.ProxyServer;
 import socks.server.ServerAuthenticatorNone;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
@@ -65,6 +63,7 @@ public class SSHManager {
                     try {
                         tryAuthenticateWithPassword(sshUsername, sshPassword, sshClient);
                     } catch (SSHConnectionException e1) {
+                        SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Authentication Failed", "Authentication for " + connectionProfile.getProfileName() + " has failed.");
                         throw new SSHConnectionException("Authentication Failed.");
                     }
                 }
@@ -72,6 +71,7 @@ public class SSHManager {
                 try {
                     tryAuthenticateWithPassword(sshUsername, sshPassword, sshClient);
                 } catch (SSHConnectionException e1) {
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Authentication Failed", "Authentication for " + connectionProfile.getProfileName() + " has failed.");
                     throw new SSHConnectionException("Authentication Failed.");
                 }
             }
@@ -84,6 +84,9 @@ public class SSHManager {
 
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Connected to " + sshHostName + ":" + sshPort);
             return sshClient;
+        } catch (UnknownHostException e) {
+            SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "The host '" + connectionProfile.getSshHostName() + ":" + connectionProfile.getSshHostPort() + "' is unknown.");
+            throw new SSHConnectionException("Unknown Host: " + connectionProfile.getSshHostName() + ":" + connectionProfile.getSshHostPort());
         } catch (SshException | IOException e) {
             throw new SSHConnectionException(e.getMessage());
         }
@@ -187,28 +190,24 @@ public class SSHManager {
                 } catch (InterruptedException e) {
                     break;
                 }
-                try {
-                    reconnectToSession();
-                } catch (Exception e) {
-                    SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
-                    e.printStackTrace();
-                    break;
-                }
+                reconnectToSession();
             }
             disconnectFromSshClient();
         }
 
-        private void reconnectToSession() throws InterruptedException {
+        private void reconnectToSession() {
             if (!sshClient.isConnected()) {
-                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "SSH Connection Lost! Reconnecting...");
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTING);
+                SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "SSH Connection Lost! Reconnecting...");
                 try {
                     shutDownDynamicTunnel();
                     sshClient = connectToSsh(connector, connectionProfile);
                     SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Reconnection Failed", "Could not reconnect to " + connectionProfile.getProfileName() + ".");
                 } catch (SSHConnectionException e) {
-                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Error While Reconnecting: " + e.getMessage());
                     SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+                    SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Error While Reconnecting: " + e.getMessage());
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Reconnection Failed", "Could not reconnect to " + connectionProfile.getProfileName() + ".");
                 }
             }
         }

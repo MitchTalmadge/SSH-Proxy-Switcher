@@ -2,7 +2,7 @@ package com.mitchtalmadge.sshproxyswitcher.managers.properties;
 
 public enum PropertiesEnum {
 
-    TEST("Test", "test");
+    MUTE_NOTIFICATIONS("Mute_Notifications", "false");
 
     private final String key;
     private final String defaultValue;
