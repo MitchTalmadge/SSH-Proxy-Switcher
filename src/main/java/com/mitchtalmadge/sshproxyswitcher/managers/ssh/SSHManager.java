@@ -9,8 +9,6 @@ import com.sshtools.publickey.SshPrivateKeyFile;
 import com.sshtools.publickey.SshPrivateKeyFileFactory;
 import com.sshtools.ssh.*;
 import com.sshtools.ssh.components.SshKeyPair;
-import com.sshtools.ssh.components.SshPrivateKey;
-import com.sshtools.ssh.components.SshRsaPrivateKey;
 import socks.ProxyServer;
 import socks.server.ServerAuthenticatorNone;
 
@@ -147,7 +145,7 @@ public class SSHManager {
     protected void shutDownDynamicTunnel() {
         if (this.dynamicTunnelMaintainerThread != null) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Closing Dynamic Tunnel...");
-            dynamicTunnelMaintainerThread.shutDown();
+            dynamicTunnelMaintainerThread.interrupt();
             try {
                 dynamicTunnelMaintainerThread.join();
             } catch (InterruptedException e) {
@@ -229,8 +227,6 @@ public class SSHManager {
         private SshClient sshClient;
         private int proxyPort;
 
-        private AtomicBoolean running = new AtomicBoolean(true);
-
         public DynamicTunnelMaintainerThread(SshClient sshClient, int proxyPort) {
             super("DynamicTunnelMaintainerThread");
             this.sshClient = sshClient;
@@ -242,16 +238,9 @@ public class SSHManager {
             ProxyServer socksServer = new ProxyServer(new ServerAuthenticatorNone(), sshClient);
             socksServer.start(proxyPort);
 
-            while (true) {
-                if (!running.get())
-                    break;
-            }
+            System.out.println("DynamicTunnelMaintainerThread closing.");
 
             socksServer.stop();
-        }
-
-        public void shutDown() {
-            this.running.set(false);
         }
     }
 }
