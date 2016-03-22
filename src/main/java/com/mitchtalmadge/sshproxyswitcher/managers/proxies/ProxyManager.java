@@ -15,6 +15,14 @@ public class ProxyManager {
     private static final String PROXY_ENABLED_KEY = "ProxyEnable";
     private static final String PROXY_SETTINGS_KEY = "ProxyServer";
 
+    private final int originalProxyEnabled;
+    private final String originalProxySettings;
+
+    public ProxyManager() {
+        originalProxyEnabled = getProxyEnabledValue();
+        originalProxySettings = getProxySettingsValue();
+    }
+
     public void setProxySettings(Profile profile) throws ProxySettingsException {
         if (profile != null) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Checking Proxy Settings for " + profile.getProfileName() + "...");
@@ -38,16 +46,33 @@ public class ProxyManager {
             proxyHostName = "localhost";
         if (proxyPort == 0)
             proxyPort = 2000;
-        Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, (socks ? "socks=" : "") + proxyHostName + ":" + proxyPort);
+        setProxySettingsValue((socks ? "socks=" : "") + proxyHostName + ":" + proxyPort);
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Settings Updated.");
     }
 
     public void disableProxySettings() {
-        setProxyEnabled(false);
+        setProxyEnabledValue(originalProxyEnabled);
+        setProxySettingsValue(originalProxySettings);
     }
 
     private void setProxyEnabled(boolean enabled) {
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy " + (enabled ? "Enabled." : "Disabled."));
-        Advapi32Util.registrySetIntValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_ENABLED_KEY, enabled ? 1 : 0);
+        setProxyEnabledValue(enabled ? 1 : 0);
+    }
+
+    private int getProxyEnabledValue() {
+        return Advapi32Util.registryGetIntValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_ENABLED_KEY);
+    }
+
+    private void setProxyEnabledValue(int value) {
+        Advapi32Util.registrySetIntValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_ENABLED_KEY, value);
+    }
+
+    private String getProxySettingsValue() {
+        return Advapi32Util.registryGetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY);
+    }
+
+    private void setProxySettingsValue(String value) {
+        Advapi32Util.registrySetStringValue(WinReg.HKEY_USERS, REGISTRY_KEY_PATH, PROXY_SETTINGS_KEY, value);
     }
 }
