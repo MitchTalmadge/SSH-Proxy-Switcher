@@ -42,11 +42,7 @@ public class ProxyManager {
     }
 
     private void setProxy(String proxyHostName, int proxyPort, boolean socks) {
-        if (proxyHostName == null || proxyHostName.isEmpty())
-            proxyHostName = "localhost";
-        if (proxyPort == 0)
-            proxyPort = 2000;
-        setProxySettingsValue((socks ? "socks=" : "") + proxyHostName + ":" + proxyPort);
+        setProxySettingsValue((socks ? "socks=" : "") + proxyHostName + ":" + (proxyPort > 0 ? proxyPort : ""));
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Settings Updated.");
     }
 

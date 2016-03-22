@@ -78,7 +78,7 @@
                                              <children>
                                                 <Label text="Host Name" />
                                                 <LimitingTextField fx:id="sshHostNameField" promptText="Required" GridPane.rowIndex="1" />
-                                                <LimitingTextField fx:id="sshPortField" promptText="Default: 22" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <LimitingTextField fx:id="sshPortField" promptText="Required" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                 <Label text="Port" GridPane.columnIndex="1" />
                                              </children>
                                           </GridPane>
@@ -137,9 +137,9 @@
                                             </rowConstraints>
                                              <children>
                                                 <Label text="Proxy Port" GridPane.columnIndex="1" />
-                                                <LimitingTextField fx:id="proxyPortField" promptText="Default: 2000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <LimitingTextField fx:id="proxyPortField" promptText="" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                                 <Label text="Proxy Host Name" />
-                                                <LimitingTextField fx:id="proxyHostNameField" promptText="Default: 127.0.0.1" GridPane.rowIndex="1" />
+                                                <LimitingTextField fx:id="proxyHostNameField" promptText="" GridPane.rowIndex="1" />
                                              </children>
                                           </GridPane>
                                        </children>

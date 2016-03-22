@@ -47,12 +47,12 @@ public class SSHManager {
     protected SshClient connectToSsh(SshConnector connector, Profile connectionProfile) throws SSHConnectionException {
         try {
             String sshHostName = connectionProfile.getSshHostName();
-            int sshPort = connectionProfile.getSshHostPort() > 0 ? connectionProfile.getSshHostPort() : 22;
+            int sshPort = connectionProfile.getSshHostPort();
             String sshUsername = connectionProfile.getSshUsername();
             String sshPassword = connectionProfile.getSshPassword();
             String rsaKeyPath = connectionProfile.getSshRsaPrivateKeyFilePath();
             String rsaKeyPass = connectionProfile.getSshRsaPrivateKeyPassword();
-            int proxyPort = connectionProfile.getProxyPort() > 0 ? connectionProfile.getProxyPort() : 2000;
+            int proxyPort = connectionProfile.getProxyPort();
 
             SshClient sshClient = connector.connect(new SocketTransport(sshHostName, sshPort), sshUsername, true);
 

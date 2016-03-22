@@ -240,6 +240,9 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         }
 
         Profile profile = new Profile(profileName);
+        profile.setSshHostPort(22);
+        profile.setProxyHostName("127.0.0.1");
+        profile.setProxyPort(2000);
         SSHProxySwitcher.getInstance().getProfileManager().addProfile(profile);
 
         profileListView.getSelectionModel().selectLast();
