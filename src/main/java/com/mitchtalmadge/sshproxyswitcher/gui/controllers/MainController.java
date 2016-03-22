@@ -1,4 +1,4 @@
-package com.mitchtalmadge.sshproxyswitcher.gui.main;
+package com.mitchtalmadge.sshproxyswitcher.gui.controllers;
 
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.gui.GUIHelper;
@@ -9,16 +9,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -34,6 +32,12 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
      */
     @FXML
     private Label headerLabel;
+
+    @FXML
+    private Tab logsTab;
+
+    @FXML
+    private Tab settingsTab;
 
     /**
      * The entire Configuration Panel
@@ -152,6 +156,13 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         SSHProxySwitcher.getInstance().getProfileManager().addLoadedProfilesListener(this);
+
+        //Add Tabs
+        try {
+            this.logsTab.setContent(FXMLLoader.load(getClass().getResource("/gui/logs.fxml")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //Set up limiting text fields
         this.sshHostNameField.setRegexLimiter("[a-zA-Z0-9\\.]*");
@@ -292,9 +303,15 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
     @FXML
     void onDeleteButtonFired(ActionEvent event) {
         Profile selectedProfile = profileListView.getSelectionModel().getSelectedItem();
+        int selectedIndex = profileListView.getSelectionModel().getSelectedIndex();
         if (GUIHelper.getConfirmationFromDialog("Delete?", "Deletion Confirmation", "Are you sure you want to delete " + selectedProfile.getProfileName() + "?")) {
             SSHProxySwitcher.getInstance().getProfileManager().deleteProfile(selectedProfile);
         }
+
+        if (profileListView.getItems().size() - 1 >= selectedIndex)
+            profileListView.getSelectionModel().select(selectedIndex);
+        else
+            profileListView.getSelectionModel().select(selectedIndex > 0 ? selectedIndex - 1 : 0);
     }
 
     /**
@@ -344,4 +361,5 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         else
             configurationPane.setVisible(false);
     }
+
 }

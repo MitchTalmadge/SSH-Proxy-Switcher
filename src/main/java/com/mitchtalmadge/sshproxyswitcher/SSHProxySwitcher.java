@@ -8,7 +8,6 @@ import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesExceptio
 import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxyManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHManager;
-import com.mitchtalmadge.sshproxyswitcher.utilities.FileUtilities;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -25,8 +24,8 @@ import java.util.prefs.Preferences;
 
 public class SSHProxySwitcher extends Application {
 
-    private static final File LOG_DIR = new File(Versioning.getApplicationDir(), "logs");
-    private static final File PROPERTIES_FILE = new File(Versioning.getApplicationDir(), "SSHProxySwitcher.config");
+    public static final File LOG_DIR = new File(Versioning.getApplicationDir(), "logs");
+    public static final File PROPERTIES_FILE = new File(Versioning.getApplicationDir(), "SSHProxySwitcher.config");
     private static SSHProxySwitcher instance;
     private LoggingManager loggingManager;
     private PropertiesManager propertiesManager;
@@ -90,7 +89,7 @@ public class SSHProxySwitcher extends Application {
         stage.setResizable(false);
         stage.getIcons().add(Versioning.getLogoAsJavaFXImage());
         stage.setOnCloseRequest(event -> {
-            loggingManager.log(Level.INFO, "Hiding Control Panel");
+            loggingManager.log(Level.FINE, "Hiding Control Panel");
             stage.hide();
             event.consume();
         });
@@ -99,6 +98,7 @@ public class SSHProxySwitcher extends Application {
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
+        stage.sizeToScene();
 
         loggingManager.log(Level.INFO, "SSH Proxy Switcher is running");
     }
@@ -161,7 +161,7 @@ public class SSHProxySwitcher extends Application {
     public void showMainWindow() {
         Platform.runLater(() -> {
             if (stage != null) {
-                loggingManager.log(Level.INFO, "Showing Control Panel");
+                loggingManager.log(Level.FINE, "Showing Control Panel");
                 stage.show();
             }
         });

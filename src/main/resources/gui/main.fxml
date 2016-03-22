@@ -7,35 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import com.mitchtalmadge.sshproxyswitcher.gui.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mitchtalmadge.sshproxyswitcher.gui.main.MainController">
-   <left>
-      <BorderPane BorderPane.alignment="CENTER">
-         <top>
-            <Label text="Profiles" BorderPane.alignment="CENTER_LEFT">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
-         </top>
-         <bottom>
-            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCreateButtonFired" text="Create New Profile" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets />
-               </BorderPane.margin>
-            </Button>
-         </bottom>
-         <BorderPane.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" />
-         </BorderPane.margin>
-         <center>
-            <ListView fx:id="profileListView" prefHeight="300.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets bottom="5.0" />
-               </BorderPane.margin>
-            </ListView>
-         </center>
-      </BorderPane>
-   </left>
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mitchtalmadge.sshproxyswitcher.gui.controllers.MainController">
    <top>
       <Label fx:id="headerLabel" contentDisplay="RIGHT" text="SSH Proxy Switcher" BorderPane.alignment="CENTER">
          <font>
@@ -44,121 +16,174 @@
       </Label>
    </top>
    <center>
-      <BorderPane fx:id="configurationPane" BorderPane.alignment="CENTER">
-         <top>
-            <Label text="Configuration" BorderPane.alignment="CENTER_LEFT">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
-         </top>
-         <center>
-            <VBox prefHeight="300.0" prefWidth="400.0" spacing="5.0">
-               <children>
-                  <Label text="Profile Name" />
-                  <LimitingTextField fx:id="profileNameField" promptText="Required" />
-                  <CheckBox fx:id="connectToSSHCheck" mnemonicParsing="false" onAction="#onConnectToSSHCheckFired" text="Connect to an SSH Server" />
-                  <VBox fx:id="sshServerConfiguration">
-                     <children>
-                        <GridPane hgap="5.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="75.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="25.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints fillHeight="false" vgrow="NEVER" />
-                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label text="Host Name" />
-                              <LimitingTextField fx:id="sshHostNameField" promptText="Required" GridPane.rowIndex="1" />
-                              <LimitingTextField fx:id="sshPortField" promptText="Default: 22" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <Label text="Port" GridPane.columnIndex="1" />
-                           </children>
-                        </GridPane>
-                        <GridPane hgap="5.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints vgrow="NEVER" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label text="Username" />
-                              <LimitingTextField fx:id="sshUsernameField" promptText="Required" GridPane.rowIndex="1" />
-                              <Label text="Password" GridPane.columnIndex="1" />
-                              <PasswordField fx:id="sshPasswordField" promptText="Optional" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                           </children>
-                        </GridPane>
-                        <GridPane hgap="5.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="45.0" prefWidth="100.0" />
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="35.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints vgrow="NEVER" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label prefHeight="17.0" prefWidth="176.0" text="RSA Private Key File" GridPane.columnSpan="2" />
-                              <TextField fx:id="sshRsaKeyPathField" editable="false" mouseTransparent="true" promptText="Private Key Path" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSshRsaBrowseButtonFired" text="Browse..." GridPane.rowIndex="1" />
-                              <Label text="RSA Private Key Password" GridPane.columnIndex="2" />
-                              <PasswordField fx:id="sshRsaKeyPasswordField" promptText="Optional" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                           </children>
-                        </GridPane>
-                     </children>
-                  </VBox>
-                  <HBox spacing="20.0">
-                     <children>
-                        <CheckBox fx:id="proxyAutosetCheck" mnemonicParsing="false" onAction="#onProxyAutosetCheckFired" text="Automatically Enable Proxy" />
-                        <CheckBox fx:id="proxyTunnelCheck" mnemonicParsing="false" onAction="#onProxyTunnelCheckFired" text="Enable SSH Dynamic Tunnel" />
-                     </children>
-                  </HBox>
-                  <VBox fx:id="proxyConfiguration" VBox.vgrow="NEVER">
-                     <children>
-                        <GridPane hgap="5.0">
-                          <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="75.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="25.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints vgrow="NEVER" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Label text="Proxy Port" GridPane.columnIndex="1" />
-                              <LimitingTextField fx:id="proxyPortField" promptText="Default: 2000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <Label text="Proxy Host Name" />
-                              <LimitingTextField fx:id="proxyHostNameField" promptText="Default: 127.0.0.1" GridPane.rowIndex="1" />
-                           </children>
-                        </GridPane>
-                     </children>
-                  </VBox>
-               </children>
-            </VBox>
-         </center>
-         <BorderPane.margin>
-            <Insets bottom="5.0" left="5.0" right="5.0" />
-         </BorderPane.margin>
-         <bottom>
-            <GridPane fx:id="configurationButtons" hgap="5.0" BorderPane.alignment="CENTER">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
-                <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints fillHeight="false" vgrow="SOMETIMES" />
-              </rowConstraints>
-               <children>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onDeleteButtonFired" text="Delete Profile" />
-                  <Button defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSaveButtonFired" text="Save Profile" GridPane.columnIndex="1" />
-               </children>
-            </GridPane>
-         </bottom>
-      </BorderPane>
+      <TabPane styleClass="floating" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+         <tabs>
+            <Tab closable="false" text="Profiles">
+               <content>
+                  <BorderPane prefHeight="360.0" prefWidth="620.0">
+                     <left>
+                        <BorderPane BorderPane.alignment="CENTER">
+                           <top>
+                              <Label text="Profiles" BorderPane.alignment="CENTER_LEFT">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                           </top>
+                           <bottom>
+                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCreateButtonFired" text="Create New Profile" BorderPane.alignment="CENTER">
+                                 <BorderPane.margin>
+                                    <Insets />
+                                 </BorderPane.margin>
+                              </Button>
+                           </bottom>
+                           <center>
+                              <ListView fx:id="profileListView" prefHeight="300.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                 <BorderPane.margin>
+                                    <Insets bottom="5.0" />
+                                 </BorderPane.margin>
+                              </ListView>
+                           </center>
+                           <BorderPane.margin>
+                              <Insets right="5.0" />
+                           </BorderPane.margin>
+                        </BorderPane>
+                     </left>
+                     <center>
+                        <BorderPane fx:id="configurationPane" BorderPane.alignment="CENTER">
+                           <top>
+                              <Label text="Configuration" BorderPane.alignment="CENTER_LEFT">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                           </top>
+                           <center>
+                              <VBox prefHeight="300.0" prefWidth="400.0" spacing="5.0">
+                                 <children>
+                                    <Label text="Profile Name" />
+                                    <LimitingTextField fx:id="profileNameField" promptText="Required" />
+                                    <CheckBox fx:id="connectToSSHCheck" mnemonicParsing="false" onAction="#onConnectToSSHCheckFired" text="Connect to an SSH Server" />
+                                    <VBox fx:id="sshServerConfiguration">
+                                       <children>
+                                          <GridPane hgap="5.0">
+                                            <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="75.0" prefWidth="100.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="25.0" prefWidth="100.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                              <RowConstraints fillHeight="false" vgrow="NEVER" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                             <children>
+                                                <Label text="Host Name" />
+                                                <LimitingTextField fx:id="sshHostNameField" promptText="Required" GridPane.rowIndex="1" />
+                                                <LimitingTextField fx:id="sshPortField" promptText="Default: 22" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label text="Port" GridPane.columnIndex="1" />
+                                             </children>
+                                          </GridPane>
+                                          <GridPane hgap="5.0">
+                                            <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                              <RowConstraints vgrow="NEVER" />
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                             <children>
+                                                <Label text="Username" />
+                                                <LimitingTextField fx:id="sshUsernameField" promptText="Required" GridPane.rowIndex="1" />
+                                                <Label text="Password" GridPane.columnIndex="1" />
+                                                <PasswordField fx:id="sshPasswordField" promptText="Optional" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                             </children>
+                                          </GridPane>
+                                          <GridPane hgap="5.0">
+                                            <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="45.0" prefWidth="100.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="35.0" prefWidth="100.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                              <RowConstraints vgrow="NEVER" />
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                             <children>
+                                                <Label prefHeight="17.0" prefWidth="176.0" text="RSA Private Key File" GridPane.columnSpan="2" />
+                                                <TextField fx:id="sshRsaKeyPathField" editable="false" mouseTransparent="true" promptText="Private Key Path" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSshRsaBrowseButtonFired" text="Browse..." GridPane.rowIndex="1" />
+                                                <Label text="RSA Private Key Password" GridPane.columnIndex="2" />
+                                                <PasswordField fx:id="sshRsaKeyPasswordField" promptText="Optional" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                             </children>
+                                          </GridPane>
+                                       </children>
+                                    </VBox>
+                                    <HBox spacing="20.0">
+                                       <children>
+                                          <CheckBox fx:id="proxyAutosetCheck" mnemonicParsing="false" onAction="#onProxyAutosetCheckFired" text="Automatically Enable Proxy" />
+                                          <CheckBox fx:id="proxyTunnelCheck" mnemonicParsing="false" onAction="#onProxyTunnelCheckFired" text="Enable SSH Dynamic Tunnel" />
+                                       </children>
+                                    </HBox>
+                                    <VBox fx:id="proxyConfiguration" VBox.vgrow="NEVER">
+                                       <children>
+                                          <GridPane hgap="5.0">
+                                            <columnConstraints>
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="75.0" prefWidth="100.0" />
+                                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="25.0" prefWidth="100.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                              <RowConstraints vgrow="NEVER" />
+                                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                             <children>
+                                                <Label text="Proxy Port" GridPane.columnIndex="1" />
+                                                <LimitingTextField fx:id="proxyPortField" promptText="Default: 2000" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <Label text="Proxy Host Name" />
+                                                <LimitingTextField fx:id="proxyHostNameField" promptText="Default: 127.0.0.1" GridPane.rowIndex="1" />
+                                             </children>
+                                          </GridPane>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </VBox>
+                           </center>
+                           <bottom>
+                              <GridPane fx:id="configurationButtons" hgap="5.0" BorderPane.alignment="CENTER">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" percentWidth="50.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints fillHeight="false" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onDeleteButtonFired" text="Delete Profile" />
+                                    <Button defaultButton="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSaveButtonFired" text="Save Profile" GridPane.columnIndex="1" />
+                                 </children>
+                              </GridPane>
+                           </bottom>
+                        </BorderPane>
+                     </center>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </BorderPane>
+               </content>
+            </Tab>
+            <Tab fx:id="logsTab" closable="false" text="Logs">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              </content>
+            </Tab>
+            <Tab fx:id="settingsTab" closable="false" text="Settings">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+              </content>
+            </Tab>
+         </tabs>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </TabPane>
    </center>
 </BorderPane>

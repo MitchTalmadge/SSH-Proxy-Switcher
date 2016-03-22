@@ -23,8 +23,8 @@ public class ProxyManager {
                 setProxyEnabled(false);
                 throw new ProxySettingsException("Port is out of bounds: " + profile.getProxyPort());
             } else {
-                setProxyEnabled(true);
                 setProxy(profile.getProxyHostName(), profile.getProxyPort(), profile.shouldUseSshDynamicTunnel());
+                setProxyEnabled(true);
             }
         } else {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Tried to set Proxy Settings, but profile was null.");
