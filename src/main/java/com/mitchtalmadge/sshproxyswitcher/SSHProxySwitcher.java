@@ -1,5 +1,7 @@
 package com.mitchtalmadge.sshproxyswitcher;
 
+import com.aptitekk.aptiapi.AptiAPI;
+import com.aptitekk.aptiapi.AptiAPIListener;
 import com.mitchtalmadge.sshproxyswitcher.gui.GUIHelper;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.logging.LoggingManager;
@@ -22,11 +24,14 @@ import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
-public class SSHProxySwitcher extends Application {
+public class SSHProxySwitcher extends Application implements AptiAPIListener {
 
     public static final File LOG_DIR = new File(Versioning.getApplicationDir(), "logs");
     public static final File PROPERTIES_FILE = new File(Versioning.getApplicationDir(), "SSHProxySwitcher.config");
+
     private static SSHProxySwitcher instance;
+    private static AptiAPI aptiAPI = new AptiAPI(new Versioning());
+
     private LoggingManager loggingManager;
     private PropertiesManager propertiesManager;
     private ProfileManager profileManager;
@@ -41,12 +46,17 @@ public class SSHProxySwitcher extends Application {
     }
 
     public static void main(String... args) {
+        aptiAPI.setErrorHandler(new ErrorHandler(aptiAPI));
+        aptiAPI.setUpdateHandler(new UpdateHandler());
+
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         instance = this;
+
+        aptiAPI.addAPIListener(this);
 
         if (!isWindows()) {
             GUIHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
@@ -101,6 +111,8 @@ public class SSHProxySwitcher extends Application {
         stage.sizeToScene();
 
         loggingManager.log(Level.INFO, "SSH Proxy Switcher is running");
+
+        aptiAPI.checkForUpdates();
     }
 
     @Override
@@ -173,5 +185,22 @@ public class SSHProxySwitcher extends Application {
 
     public TrayIconManager getTrayIconManager() {
         return trayIconManager;
+    }
+
+    @Override
+    public void aptiApiInfo(String s) {
+        if (loggingManager != null)
+            loggingManager.log(Level.INFO, s);
+    }
+
+    @Override
+    public void aptiApiError(String s) {
+        if (loggingManager != null)
+            loggingManager.log(Level.SEVERE, s);
+    }
+
+    @Override
+    public void shutdown() {
+        Platform.exit();
     }
 }

@@ -1,11 +1,13 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.logging;
 
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.Versioning;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.*;
 
@@ -69,6 +71,12 @@ public class LoggingManager {
 
     public void addLogListener(LogListener listener) {
         logListeners.add(listener);
+    }
+
+    public File getLogFile() {
+        File[] logFiles = SSHProxySwitcher.LOG_DIR.listFiles(pathname -> pathname.getName().endsWith(".log"));
+        Arrays.sort(logFiles, (f1, f2) -> Long.valueOf(f2.lastModified()).compareTo(f1.lastModified()));
+        return logFiles[0];
     }
 
     public interface LogListener {

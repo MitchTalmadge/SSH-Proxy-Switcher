@@ -1,5 +1,6 @@
 package com.mitchtalmadge.sshproxyswitcher;
 
+import com.aptitekk.aptiapi.AptiAPIVersioningDetails;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconImage;
 import javafx.scene.image.Image;
 
@@ -9,13 +10,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-public class Versioning {
+public class Versioning implements AptiAPIVersioningDetails {
 
-    public static final String VERSION_STRING = "1.0";
+    public static final double VERSION = 1.0;
+    public static final String VERSION_STRING = VERSION + "";
     public static final String PROGRAM_NAME = "SSH Proxy Switcher";
     public static final String PROGRAM_NAME_WITH_VERSION = PROGRAM_NAME + " V" + VERSION_STRING;
     public static final String PROGRAM_NAME_NO_SPACES = "SSH-Proxy-Switcher";
     public static final int APTIAPI_PROJECT_ID = 2;
+    public static final int APTIAPI_VERSION_ID = 1;
     private static final File APPLICATION_DIR = new File(System.getenv("AppData"), "SSHProxySwitcher");
     private static String logoImageLocation = "/images/Logo-32px.png";
     private static BufferedImage logoImage = null;
@@ -62,5 +65,35 @@ public class Versioning {
 
     public static File getApplicationDir() {
         return APPLICATION_DIR;
+    }
+
+    @Override
+    public double getVersion() {
+        return VERSION;
+    }
+
+    @Override
+    public String getVersionString() {
+        return VERSION_STRING;
+    }
+
+    @Override
+    public String getProgramName() {
+        return PROGRAM_NAME;
+    }
+
+    @Override
+    public String getProgramNameWithVersion() {
+        return PROGRAM_NAME_WITH_VERSION;
+    }
+
+    @Override
+    public int getAptiAPIProjectID() {
+        return APTIAPI_PROJECT_ID;
+    }
+
+    @Override
+    public int getAptiAPIVersionID() {
+        return APTIAPI_VERSION_ID;
     }
 }
