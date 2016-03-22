@@ -37,7 +37,7 @@ public class ProfileManager {
                 objectOutputStream.close();
                 fileOutputStream.close();
             } catch (IOException | ProfileCryptException e) {
-                e.printStackTrace();
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }
 
             for (LoadedProfilesListener listener : listeners)
@@ -86,7 +86,7 @@ public class ProfileManager {
         } catch (EOFException e) {
             return;
         } catch (IOException | ClassNotFoundException | ProfileCryptException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
 
         for (LoadedProfilesListener listener : listeners)
@@ -140,7 +140,7 @@ public class ProfileManager {
                     SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
             } catch (SSHConnectionException | ProxySettingsException e) {
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
-                e.printStackTrace();
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }
         }
     }

@@ -74,7 +74,7 @@ public class SSHProxySwitcher extends Application implements AptiAPIListener {
         try {
             propertiesManager.loadPropertiesFromFile(PROPERTIES_FILE);
         } catch (PropertiesException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
 
         loggingManager.log(Level.INFO, "Reading Profiles");
@@ -177,6 +177,11 @@ public class SSHProxySwitcher extends Application implements AptiAPIListener {
                 stage.show();
             }
         });
+    }
+
+    public static void reportError(Thread thread, Throwable throwable)
+    {
+        aptiAPI.getErrorHandler().uncaughtException(thread, throwable);
     }
 
     public ProxyManager getProxyManager() {

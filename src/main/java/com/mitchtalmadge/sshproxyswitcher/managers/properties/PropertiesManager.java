@@ -1,5 +1,7 @@
 package com.mitchtalmadge.sshproxyswitcher.managers.properties;
 
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
+
 import java.io.*;
 import java.util.Properties;
 
@@ -20,16 +22,16 @@ public class PropertiesManager {
                 try {
                     properties.load(inputStream);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    SSHProxySwitcher.reportError(Thread.currentThread(), e);
                 } finally {
                     try {
                         inputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        SSHProxySwitcher.reportError(Thread.currentThread(), e);
                     }
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }
         }
         validateProperties();
@@ -55,16 +57,16 @@ public class PropertiesManager {
                 try {
                     properties.store(outputStream, null);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    SSHProxySwitcher.reportError(Thread.currentThread(), e);
                 } finally {
                     try {
                         outputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        SSHProxySwitcher.reportError(Thread.currentThread(), e);
                     }
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }
         }
     }

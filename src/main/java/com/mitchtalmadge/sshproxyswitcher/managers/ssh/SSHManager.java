@@ -112,7 +112,7 @@ public class SSHManager {
             }
         } catch (InvalidPassphraseException | IOException | SshException e) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "RSA Key Auth Failed: ");
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
             throw new SSHConnectionException(e.getMessage());
         }
     }

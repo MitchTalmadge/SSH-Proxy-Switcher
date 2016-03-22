@@ -33,7 +33,7 @@ public class Versioning implements AptiAPIVersioningDetails {
                 trayIconImages[i] = ImageIO.read(TrayIconImage.class.getResource(TrayIconImage.values()[i].getImagePath()));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
 
         if (!APPLICATION_DIR.exists())

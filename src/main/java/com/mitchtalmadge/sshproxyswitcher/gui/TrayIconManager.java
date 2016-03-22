@@ -52,7 +52,7 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
-                e.printStackTrace();
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }
 
             SSHProxySwitcher.getInstance().getProfileManager().addLoadedProfilesListener(this);

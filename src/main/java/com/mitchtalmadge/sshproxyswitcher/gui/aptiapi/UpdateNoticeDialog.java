@@ -20,6 +20,7 @@
 
 package com.mitchtalmadge.sshproxyswitcher.gui.aptiapi;
 
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.gui.aptiapi.controllers.UpdateNoticeDialogController;
 import javafx.fxml.FXMLLoader;
@@ -59,7 +60,7 @@ public class UpdateNoticeDialog {
 
             stage.setScene(new Scene(root));
         } catch (IOException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
     }
 

@@ -161,7 +161,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         try {
             this.logsTab.setContent(FXMLLoader.load(getClass().getResource("/gui/logs.fxml")));
         } catch (IOException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
 
         //Set up limiting text fields
@@ -276,7 +276,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
                 bufferedReader.close();
                 fileReader.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }
         }
     }

@@ -21,6 +21,7 @@
 package com.mitchtalmadge.sshproxyswitcher.gui.aptiapi;
 
 import com.aptitekk.aptiapi.ErrorReport;
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.gui.aptiapi.controllers.ErrorReportDetailsDialogController;
 import com.mitchtalmadge.sshproxyswitcher.gui.aptiapi.controllers.ErrorReportDialogController;
@@ -64,7 +65,7 @@ public class ErrorReportDetailsDialog {
 
             stage.setScene(new Scene(root));
         } catch (IOException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
     }
 

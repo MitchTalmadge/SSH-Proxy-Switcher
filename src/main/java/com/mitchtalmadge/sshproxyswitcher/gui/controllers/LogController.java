@@ -29,7 +29,7 @@ public class LogController implements Initializable, LoggingManager.LogListener 
         try {
             Desktop.getDesktop().browse(SSHProxySwitcher.LOG_DIR.toURI());
         } catch (IOException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
     }
 

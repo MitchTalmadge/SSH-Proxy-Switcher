@@ -20,6 +20,7 @@
 
 package com.mitchtalmadge.sshproxyswitcher.gui.aptiapi.controllers;
 
+import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.gui.aptiapi.UpdateNoticeDialog;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -54,7 +55,7 @@ public class UpdateNoticeDialogController {
         try {
             Desktop.getDesktop().browse(new URI(downloadUrl));
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }
         parent.close();
     }
