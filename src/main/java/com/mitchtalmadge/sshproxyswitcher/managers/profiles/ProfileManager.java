@@ -138,7 +138,10 @@ public class ProfileManager {
                     SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Connected!", "Connection to " + profile.getProfileName() + " has been established.");
                 else if (profile.shouldAutoEnableProxy())
                     SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
-            } catch (SSHConnectionException | ProxySettingsException e) {
+            } catch (SSHConnectionException e) {
+                SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
+                SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "Could not connect to "+profile.getProfileName()+": "+e.getMessage());
+            } catch (ProxySettingsException e) {
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
                 SSHProxySwitcher.reportError(Thread.currentThread(), e);
             }

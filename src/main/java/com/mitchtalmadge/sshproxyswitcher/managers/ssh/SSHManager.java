@@ -87,9 +87,6 @@ public class SSHManager {
         } catch (UnknownHostException e) {
             SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "The host '" + connectionProfile.getSshHostName() + ":" + connectionProfile.getSshHostPort() + "' is unknown.");
             throw new SSHConnectionException("Unknown Host: " + connectionProfile.getSshHostName() + ":" + connectionProfile.getSshHostPort());
-        } catch (SSHConnectionException e) {
-            SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "Unable to connect to " + connectionProfile.getProfileName() + ": " + e.getMessage());
-            throw new SSHConnectionException(e.getMessage());
         } catch (SshException | IOException e) {
             throw new SSHConnectionException(e.getMessage());
         }
