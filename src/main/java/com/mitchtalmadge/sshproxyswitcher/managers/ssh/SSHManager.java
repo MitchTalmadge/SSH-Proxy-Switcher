@@ -87,6 +87,9 @@ public class SSHManager {
         } catch (UnknownHostException e) {
             SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "The host '" + connectionProfile.getSshHostName() + ":" + connectionProfile.getSshHostPort() + "' is unknown.");
             throw new SSHConnectionException("Unknown Host: " + connectionProfile.getSshHostName() + ":" + connectionProfile.getSshHostPort());
+        } catch (SSHConnectionException e) {
+            SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "Unable to connect to " + connectionProfile.getProfileName() + ": " + e.getMessage());
+            throw new SSHConnectionException(e.getMessage());
         } catch (SshException | IOException e) {
             throw new SSHConnectionException(e.getMessage());
         }
@@ -138,10 +141,6 @@ public class SSHManager {
         if (this.sshMaintainerThread != null) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnecting from SSH...");
             sshMaintainerThread.stopRunning();
-            try {
-                sshMaintainerThread.join();
-            } catch (InterruptedException e) {
-            }
             sshMaintainerThread = null;
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Disconnected.");
         }
@@ -151,10 +150,6 @@ public class SSHManager {
         if (this.dynamicTunnelMaintainerThread != null) {
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Closing Dynamic Tunnel...");
             dynamicTunnelMaintainerThread.shutDown();
-            try {
-                dynamicTunnelMaintainerThread.join();
-            } catch (InterruptedException e) {
-            }
             dynamicTunnelMaintainerThread = null;
             SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Dynamic Tunnel Closed.");
         }
@@ -203,11 +198,12 @@ public class SSHManager {
                     shutDownDynamicTunnel();
                     sshClient = connectToSsh(connector, connectionProfile);
                     SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
-                    SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Reconnection Failed", "Could not reconnect to " + connectionProfile.getProfileName() + ".");
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Reconnected", "Successfully reconnected to " + connectionProfile.getProfileName() + ".");
                 } catch (SSHConnectionException e) {
                     SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
                     SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Error While Reconnecting: " + e.getMessage());
                     SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Reconnection Failed", "Could not reconnect to " + connectionProfile.getProfileName() + ".");
+                    SSHProxySwitcher.getInstance().getProfileManager().disconnectProfiles();
                 }
             }
         }

@@ -28,11 +28,6 @@
             <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.jgoodies</groupId>
-            <artifactId>jgoodies-forms</artifactId>
-            <version>1.9.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.sshtools</groupId>
             <artifactId>j2ssh-maverick</artifactId>
             <version>1.5.2</version>
