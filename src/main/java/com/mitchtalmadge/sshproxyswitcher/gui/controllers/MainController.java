@@ -160,6 +160,7 @@ public class MainController implements Initializable, ProfileManager.LoadedProfi
         //Add Tabs
         try {
             this.logsTab.setContent(FXMLLoader.load(getClass().getResource("/gui/logs.fxml")));
+            this.settingsTab.setContent(FXMLLoader.load(getClass().getResource("/gui/settings.fxml")));
         } catch (IOException e) {
             SSHProxySwitcher.reportError(Thread.currentThread(), e);
         }

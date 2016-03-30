@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="360.0" prefWidth="620.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mitchtalmadge.sshproxyswitcher.gui.controllers.SettingsController">
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+   <center>
+      <GridPane BorderPane.alignment="CENTER">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <VBox prefHeight="350.0" prefWidth="230.0" spacing="5.0">
+               <children>
+                  <Label text="Notification Settings">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <CheckBox fx:id="notifyConnectSuccess" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Notify on Connection Success">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <CheckBox fx:id="notifyConnectFail" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Notify on Connection Failure">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <CheckBox fx:id="notifyConnectLost" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Notify on Connection Lost">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <CheckBox fx:id="notifyDisconnect" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Notify on Disconnect">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <CheckBox fx:id="notifyReconnect" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Notify on Reconnect">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <CheckBox fx:id="notifyReconnectFail" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Notify on Reconnect Failure">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+               </children>
+            </VBox>
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" GridPane.columnIndex="1">
+               <children>
+                  <Label text="Startup Settings">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <Label text="Connect to Profile on Startup:">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <ComboBox fx:id="startupProfileCombo" onAction="#onStartupProfileChanged" prefWidth="150.0" promptText="Select a Profile">
+                     <VBox.margin>
+                        <Insets left="10.0" />
+                     </VBox.margin>
+                  </ComboBox>
+                  <CheckBox fx:id="startWithWindows" mnemonicParsing="false" onAction="#onCheckboxChanged" text="Start Program with Windows" disable="true">
+                     <VBox.margin>
+                        <Insets left="5.0" />
+                     </VBox.margin>
+                  </CheckBox>
+               </children>
+            </VBox>
+         </children>
+      </GridPane>
+   </center>
+</BorderPane>

@@ -3,6 +3,7 @@ package com.mitchtalmadge.sshproxyswitcher.managers.profiles;
 import com.mitchtalmadge.sshproxyswitcher.SSHProxySwitcher;
 import com.mitchtalmadge.sshproxyswitcher.Versioning;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesEnum;
 import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxySettingsException;
 import com.mitchtalmadge.sshproxyswitcher.managers.ssh.SSHConnectionException;
 import javafx.application.Platform;
@@ -135,12 +136,15 @@ public class ProfileManager {
                 connectedProfile = profile;
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
                 if (profile.shouldConnectToSsh())
-                    SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Connected!", "Connection to " + profile.getProfileName() + " has been established.");
-                else if (profile.shouldAutoEnableProxy())
-                    SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
+                    if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT))
+                        SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Connected!", "Connection to " + profile.getProfileName() + " has been established.");
+                    else if (profile.shouldAutoEnableProxy())
+                        if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT))
+                            SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
             } catch (SSHConnectionException e) {
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
-                SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "Could not connect to "+profile.getProfileName()+": "+e.getMessage());
+                if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT_FAIL))
+                    SSHProxySwitcher.getInstance().getTrayIconManager().displayError("Connection Failed", "Could not connect to " + profile.getProfileName() + ": " + e.getMessage());
             } catch (ProxySettingsException e) {
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
                 SSHProxySwitcher.reportError(Thread.currentThread(), e);
@@ -152,6 +156,8 @@ public class ProfileManager {
         if (connectedProfile != null) {
             SSHProxySwitcher.getInstance().getSSHManager().stopConnection();
             SSHProxySwitcher.getInstance().getProxyManager().disableProxySettings();
+            if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_DISCONNECT))
+                SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Disconnected", "Disconnected from " + connectedProfile.getProfileName());
             connectedProfile = null;
         }
         SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_DEFAULT);
@@ -163,6 +169,15 @@ public class ProfileManager {
 
     public void addLoadedProfilesListener(LoadedProfilesListener listener) {
         listeners.add(listener);
+    }
+
+    public Profile getProfileByName(String profileName) {
+        for (Profile profile : loadedProfiles) {
+            if (profile.getProfileName().equals(profileName))
+                return profile;
+        }
+
+        return null;
     }
 
     public interface LoadedProfilesListener {

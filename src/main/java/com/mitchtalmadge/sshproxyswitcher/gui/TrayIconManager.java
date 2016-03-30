@@ -99,7 +99,7 @@ public class TrayIconManager implements ActionListener, ProfileManager.LoadedPro
         return popupMenu;
     }
 
-    private void refreshPopupMenu() {
+    public void refreshPopupMenu() {
         trayIcon.setPopupMenu(buildPopupMenu(SSHProxySwitcher.getInstance().getProfileManager().getLoadedProfiles()));
     }
 

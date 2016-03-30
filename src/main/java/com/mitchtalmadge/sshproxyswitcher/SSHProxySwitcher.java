@@ -5,7 +5,9 @@ import com.aptitekk.aptiapi.AptiAPIListener;
 import com.mitchtalmadge.sshproxyswitcher.gui.GUIHelper;
 import com.mitchtalmadge.sshproxyswitcher.gui.TrayIconManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.logging.LoggingManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.profiles.Profile;
 import com.mitchtalmadge.sshproxyswitcher.managers.profiles.ProfileManager;
+import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesEnum;
 import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesException;
 import com.mitchtalmadge.sshproxyswitcher.managers.properties.PropertiesManager;
 import com.mitchtalmadge.sshproxyswitcher.managers.proxies.ProxyManager;
@@ -54,65 +56,76 @@ public class SSHProxySwitcher extends Application implements AptiAPIListener {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        instance = this;
-
-        aptiAPI.addAPIListener(this);
-
-        if (!isWindows()) {
-            GUIHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
-            System.exit(1);
-        }
-        if (!isRunningAsAdmin()) {
-            GUIHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrative Privileges. This program will now close.");
-            System.exit(2);
-        }
-
-        this.loggingManager = new LoggingManager();
-        loggingManager.startLogging(LOG_DIR);
-
-        this.propertiesManager = new PropertiesManager();
         try {
-            propertiesManager.loadPropertiesFromFile(PROPERTIES_FILE);
-        } catch (PropertiesException e) {
-            SSHProxySwitcher.reportError(Thread.currentThread(), e);
+            instance = this;
+
+            aptiAPI.addAPIListener(this);
+
+            if (!isWindows()) {
+                GUIHelper.showErrorDialog("Error", "Windows Only", "SSH Proxy Switcher only works on Windows. This program will now close.");
+                System.exit(1);
+            }
+            if (!isRunningAsAdmin()) {
+                GUIHelper.showErrorDialog("Error", "Administrator Privileges Required", "SSH Proxy Switcher requires Administrative Privileges. This program will now close.");
+                System.exit(2);
+            }
+
+            this.loggingManager = new LoggingManager();
+            loggingManager.startLogging(LOG_DIR);
+
+            this.propertiesManager = new PropertiesManager();
+            try {
+                propertiesManager.loadPropertiesFromFile(PROPERTIES_FILE);
+            } catch (PropertiesException e) {
+                SSHProxySwitcher.reportError(Thread.currentThread(), e);
+            }
+
+            loggingManager.log(Level.INFO, "Reading Profiles");
+            this.profileManager = new ProfileManager();
+            profileManager.loadProfiles();
+
+            loggingManager.log(Level.INFO, "Starting SSH Service");
+            this.sshManager = new SSHManager();
+
+            loggingManager.log(Level.INFO, "Starting Proxy Service");
+            this.proxyManager = new ProxyManager();
+
+            loggingManager.log(Level.INFO, "Starting Tray Icon Service");
+            this.trayIconManager = new TrayIconManager();
+            trayIconManager.setStatus(TrayIconManager.STATUS_DEFAULT);
+
+            loggingManager.log(Level.INFO, "Loading User Interface");
+            Platform.setImplicitExit(false); //Prevent application from closing when window is hidden.
+
+            this.stage = primaryStage;
+            stage.setTitle(Versioning.PROGRAM_NAME);
+            stage.setResizable(false);
+            stage.getIcons().add(Versioning.getLogoAsJavaFXImage());
+            stage.setOnCloseRequest(event -> {
+                loggingManager.log(Level.FINE, "Hiding Control Panel");
+                stage.hide();
+                event.consume();
+            });
+
+            Parent root = FXMLLoader.load(getClass().getResource("/gui/main.fxml"));
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.sizeToScene();
+
+            loggingManager.log(Level.INFO, "SSH Proxy Switcher is running");
+
+            if (!propertiesManager.getPropertyAsString(PropertiesEnum.AUTO_CONNECT_PROFILE).isEmpty()) {
+                Profile startupProfile = profileManager.getProfileByName(propertiesManager.getPropertyAsString(PropertiesEnum.AUTO_CONNECT_PROFILE));
+                if (startupProfile != null)
+                    profileManager.connectProfile(startupProfile);
+                trayIconManager.refreshPopupMenu();
+            }
+
+            aptiAPI.checkForUpdates();
+        } catch (Exception e) {
+            reportError(Thread.currentThread(), e);
         }
-
-        loggingManager.log(Level.INFO, "Reading Profiles");
-        this.profileManager = new ProfileManager();
-        profileManager.loadProfiles();
-
-        loggingManager.log(Level.INFO, "Starting SSH Service");
-        this.sshManager = new SSHManager();
-
-        loggingManager.log(Level.INFO, "Starting Proxy Service");
-        this.proxyManager = new ProxyManager();
-
-        loggingManager.log(Level.INFO, "Starting Tray Icon Service");
-        this.trayIconManager = new TrayIconManager();
-        trayIconManager.setStatus(TrayIconManager.STATUS_DEFAULT);
-
-        loggingManager.log(Level.INFO, "Loading User Interface");
-        Platform.setImplicitExit(false); //Prevent application from closing when window is hidden.
-
-        this.stage = primaryStage;
-        stage.setTitle(Versioning.PROGRAM_NAME);
-        stage.setResizable(false);
-        stage.getIcons().add(Versioning.getLogoAsJavaFXImage());
-        stage.setOnCloseRequest(event -> {
-            loggingManager.log(Level.FINE, "Hiding Control Panel");
-            stage.hide();
-            event.consume();
-        });
-
-        Parent root = FXMLLoader.load(getClass().getResource("/gui/main.fxml"));
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.sizeToScene();
-
-        loggingManager.log(Level.INFO, "SSH Proxy Switcher is running");
-
-        aptiAPI.checkForUpdates();
     }
 
     @Override
@@ -179,8 +192,7 @@ public class SSHProxySwitcher extends Application implements AptiAPIListener {
         });
     }
 
-    public static void reportError(Thread thread, Throwable throwable)
-    {
+    public static void reportError(Thread thread, Throwable throwable) {
         aptiAPI.getErrorHandler().uncaughtException(thread, throwable);
     }
 
@@ -190,6 +202,10 @@ public class SSHProxySwitcher extends Application implements AptiAPIListener {
 
     public TrayIconManager getTrayIconManager() {
         return trayIconManager;
+    }
+
+    public PropertiesManager getPropertiesManager() {
+        return propertiesManager;
     }
 
     @Override

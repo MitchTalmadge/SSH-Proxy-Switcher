@@ -70,4 +70,36 @@ public class PropertiesManager {
             }
         }
     }
+
+    public String getPropertyAsString(PropertiesEnum property) {
+        if (properties == null)
+            return property.getDefaultValue();
+
+        String propertyString = properties.getProperty(property.getKey());
+        if (propertyString == null)
+            return property.getDefaultValue();
+        return propertyString;
+    }
+
+    public boolean getPropertyAsBool(PropertiesEnum property) {
+        String propertyString = getPropertyAsString(property);
+        return Boolean.parseBoolean(propertyString);
+    }
+
+    public int getPropertyAsInt(PropertiesEnum property) {
+        String propertyString = getPropertyAsString(property);
+        try {
+            return Integer.parseInt(propertyString);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    public void setProperty(PropertiesEnum property, String value)
+    {
+        if(properties == null)
+            return;
+        properties.setProperty(property.getKey(), value == null ? property.getDefaultValue() : value);
+        saveProperties();
+    }
 }
