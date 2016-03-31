@@ -42,7 +42,8 @@ public class ProxyManager {
     }
 
     private void setProxy(String proxyHostName, int proxyPort, boolean socks) {
-        setProxySettingsValue((socks ? "socks=" : "") + proxyHostName + ":" + (proxyPort > 0 ? proxyPort : ""));
+        System.out.println("Host: "+proxyHostName+" Port: "+proxyPort);
+        setProxySettingsValue((socks ? "socks=" : "") + (socks ? "127.0.0.1" : proxyHostName) + ":" + (proxyPort > 0 ? proxyPort : ""));
         SSHProxySwitcher.getInstance().getLoggingManager().log(Level.INFO, "Proxy Settings Updated.");
     }
 
