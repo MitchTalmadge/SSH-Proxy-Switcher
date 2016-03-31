@@ -135,12 +135,13 @@ public class ProfileManager {
                     SSHProxySwitcher.getInstance().getProxyManager().setProxySettings(profile);
                 connectedProfile = profile;
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_CONNECTED);
-                if (profile.shouldConnectToSsh())
+                if (profile.shouldConnectToSsh()) {
                     if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT))
                         SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Connected!", "Connection to " + profile.getProfileName() + " has been established.");
-                    else if (profile.shouldAutoEnableProxy())
-                        if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT))
-                            SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
+                } else if (profile.shouldAutoEnableProxy()) {
+                    if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT))
+                        SSHProxySwitcher.getInstance().getTrayIconManager().displayMessage("Proxy Enabled!", "The proxy for " + profile.getProfileName() + " has been enabled.");
+                }
             } catch (SSHConnectionException e) {
                 SSHProxySwitcher.getInstance().getTrayIconManager().setStatus(TrayIconManager.STATUS_ERROR);
                 if (SSHProxySwitcher.getInstance().getPropertiesManager().getPropertyAsBool(PropertiesEnum.NOTIFY_CONNECT_FAIL))
